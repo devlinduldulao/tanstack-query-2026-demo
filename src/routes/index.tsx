@@ -9,10 +9,28 @@ export const Route = createFileRoute("/")({
 function IndexComponent() {
   const demos = [
     {
+       title: "Prefetching",
+       description: "Preload data for faster navigation",
+       path: "/prefetching",
+       icon: <Bookmark className="h-6 w-6 text-orange-500" />
+    },
+    {
        title: "Deduplication",
        description: "Request deduplication with multiple subscribers",
        path: "/deduping",
        icon: <Layers className="h-6 w-6 text-blue-500" />
+    },
+    {
+       title: "Optimistic Updates",
+       description: "Immediate UI updates before server confirmation",
+       path: "/optimistic-update-cache",
+       icon: <Zap className="h-6 w-6 text-yellow-500" />
+    },
+    {
+       title: "Polling",
+       description: "Auto-refetching at specified intervals",
+       path: "/polling",
+       icon: <Clock className="h-6 w-6 text-cyan-500" />
     },
     {
        title: "Pagination",
@@ -31,24 +49,6 @@ function IndexComponent() {
        description: "Real-time AI-like streaming responses",
        path: "/streamed-query",
        icon: <Radio className="h-6 w-6 text-red-500" />
-    },
-    {
-       title: "Optimistic Updates",
-       description: "Immediate UI updates before server confirmation",
-       path: "/optimistic-update-cache",
-       icon: <Zap className="h-6 w-6 text-yellow-500" />
-    },
-    {
-       title: "Polling",
-       description: "Auto-refetching at specified intervals",
-       path: "/polling",
-       icon: <Clock className="h-6 w-6 text-cyan-500" />
-    },
-    {
-       title: "Prefetching",
-       description: "Preload data for faster navigation",
-       path: "/prefetching",
-       icon: <Bookmark className="h-6 w-6 text-orange-500" />
     },
     {
         title: "Broadcast",
