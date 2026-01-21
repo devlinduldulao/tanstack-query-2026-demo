@@ -1,6 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
+import { Globe, Laptop, RefreshCw, Share2, Zap } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 // ... imports
 
 /**
@@ -100,7 +108,7 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
 function BroadcastScreen() {
   const [sharedText, setSharedText] = useSharedState<string>("demo-text", "Hello World");
   const [sharedTheme, setSharedTheme] = useSharedState<"light" | "dark" | "blue">("demo-theme", "light");
-  const [lastSync] = useState(new Date());
+  // const [lastSync] = useState(new Date());
 
   const getThemeStyles = (theme: string) => {
       switch(theme) {

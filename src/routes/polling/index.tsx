@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import todoService from '@/services/todo';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw, Clock, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,6 @@ export const Route = createFileRoute('/polling/')({
 })
 
 function PollingScreen() {
-  const [intervalMs, setIntervalMs] = useState(3000);
   const [inputValue, setInputValue] = useState(String(3000));
   const [isValidInput, setIsValidInput] = useState(true);
 
@@ -40,7 +39,6 @@ function PollingScreen() {
 
     // Allow values between 100ms and 60000ms
     if (!isNaN(newValue) && newValue >= 100 && newValue <= 60000) {
-      setIntervalMs(newValue);
       setIsValidInput(true);
     } else {
       setIsValidInput(false);

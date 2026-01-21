@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import reportService from '@/services/report';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/prefetching/')({
   component: ReportsScreen,
@@ -49,7 +49,7 @@ function ReportsScreen() {
 
       <div className="grid gap-3">
              {reportsQuery.data?.map((item) => {
-                 const isCached = getCachedData(String(item.id));
+                 const isCached = !!getCachedData(String(item.id));
                  
                  return (
                  <Link 

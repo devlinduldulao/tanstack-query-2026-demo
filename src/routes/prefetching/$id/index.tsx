@@ -36,7 +36,7 @@ function ReportScreen() {
                     Updating...
                 </Badge>
             ) : (
-                 <Badge variant="success" className="bg-green-100 text-green-700 border-green-200">
+                 <Badge className="bg-green-100 text-green-700 border-green-200">
                     Live Data
                 </Badge>
             )}
