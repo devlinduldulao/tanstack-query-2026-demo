@@ -25,7 +25,6 @@ const queryClient = new QueryClient({
 const router = createRouter({
   scrollRestoration: true,
   context: {
-    auth: undefined!,
     // We'll inject this when we render
     queryClient,
   },

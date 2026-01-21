@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsgo --noEmit",
+    "llm": "node server/streaming-server.js",
+    "api": "json-server json-server/db.json --port=8080 --delay=3000",
     "openapi-ts": "openapi-ts",
     "update-swagger-pwsh": "Invoke-WebRequest -Uri \"https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json\" -OutFile \"swagger.json\"",
     "update-swagger-bash": "curl -o swagger.json \"https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json\""
@@ -32,6 +34,7 @@
     "react": "^19.2.3",
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.2.3",
+    "react-intersection-observer": "^10.0.2",
     "react-resizable-panels": "^4.4.1",
     "recharts": "^2.15.4",
     "shadcn": "^3.7.0",

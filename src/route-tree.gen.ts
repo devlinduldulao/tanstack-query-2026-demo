@@ -11,6 +11,7 @@ import { Route as StreamedQueryRouteImport } from './routes/streamed-query'
 import { Route as PaginationRouteImport } from './routes/pagination'
 import { Route as InfiniteScrollingRouteImport } from './routes/infinite-scrolling'
 import { Route as DedupingRouteImport } from './routes/deduping'
+import { Route as BroadcastRouteImport } from './routes/broadcast'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrefetchingIndexRouteImport } from './routes/prefetching/index'
 import { Route as PollingIndexRouteImport } from './routes/polling/index'
@@ -37,6 +38,11 @@ const InfiniteScrollingRoute = InfiniteScrollingRouteImport.update({
 const DedupingRoute = DedupingRouteImport.update({
   id: '/deduping',
   path: '/deduping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BroadcastRoute = BroadcastRouteImport.update({
+  id: '/broadcast',
+  path: '/broadcast',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -79,6 +85,7 @@ const OptimisticUpdateCacheIdIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/broadcast': typeof BroadcastRoute
   '/deduping': typeof DedupingRoute
   '/infinite-scrolling': typeof InfiniteScrollingRoute
   '/pagination': typeof PaginationRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/broadcast': typeof BroadcastRoute
   '/deduping': typeof DedupingRoute
   '/infinite-scrolling': typeof InfiniteScrollingRoute
   '/pagination': typeof PaginationRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/broadcast': typeof BroadcastRoute
   '/deduping': typeof DedupingRoute
   '/infinite-scrolling': typeof InfiniteScrollingRoute
   '/pagination': typeof PaginationRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/broadcast'
     | '/deduping'
     | '/infinite-scrolling'
     | '/pagination'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/broadcast'
     | '/deduping'
     | '/infinite-scrolling'
     | '/pagination'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/broadcast'
     | '/deduping'
     | '/infinite-scrolling'
     | '/pagination'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BroadcastRoute: typeof BroadcastRoute
   DedupingRoute: typeof DedupingRoute
   InfiniteScrollingRoute: typeof InfiniteScrollingRoute
   PaginationRoute: typeof PaginationRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/deduping'
       fullPath: '/deduping'
       preLoaderRoute: typeof DedupingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/broadcast': {
+      id: '/broadcast'
+      path: '/broadcast'
+      fullPath: '/broadcast'
+      preLoaderRoute: typeof BroadcastRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -257,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BroadcastRoute: BroadcastRoute,
   DedupingRoute: DedupingRoute,
   InfiniteScrollingRoute: InfiniteScrollingRoute,
   PaginationRoute: PaginationRoute,
