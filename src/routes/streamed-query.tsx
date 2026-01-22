@@ -1,21 +1,21 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient, queryOptions } from '@tanstack/react-query';
-import { experimental_streamedQuery as streamedQuery } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useQuery, useQueryClient, queryOptions } from "@tanstack/react-query";
+import { experimental_streamedQuery as streamedQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Send, RefreshCw, AlertTriangle, Monitor, Edit3, HelpCircle, Rocket } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Send, RefreshCw, AlertTriangle, Monitor, Edit3, HelpCircle, Rocket } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute('/streamed-query')({
+export const Route = createFileRoute("/streamed-query")({
   component: StreamedQueryScreen,
-})
+});
 
 // Server configuration
-const SERVER_URL = 'http://localhost:3001';
+const SERVER_URL = "http://localhost:3001";
 
 async function checkServerHealth() {
   try {
@@ -27,34 +27,34 @@ async function checkServerHealth() {
 }
 
 const samplePrompts = [
-  { icon: <Monitor className="w-5 h-5"/>, text: 'Explain clean architecture', type: 'technical' },
-  { icon: <Edit3 className="w-5 h-5"/>, text: 'Create a story about a coding adventure', type: 'creative' },
-  { icon: <HelpCircle className="w-5 h-5"/>, text: 'What makes a great web app?', type: 'general' },
-  { icon: <Rocket className="w-5 h-5"/>, text: 'How does TanStack Query work?', type: 'technical' },
+  { icon: <Monitor className="h-5 w-5" />, text: "Explain clean architecture", type: "technical" },
+  { icon: <Edit3 className="h-5 w-5" />, text: "Create a story about a coding adventure", type: "creative" },
+  { icon: <HelpCircle className="h-5 w-5" />, text: "What makes a great web app?", type: "general" },
+  { icon: <Rocket className="h-5 w-5" />, text: "How does TanStack Query work?", type: "technical" },
 ];
 
 type ChatMessage = {
   id: string;
-  type: 'user' | 'assistant';
+  type: "user" | "assistant";
   content: string | string[];
   timestamp: Date;
   streaming?: boolean;
 };
 
 function StreamedQueryScreen() {
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentPrompt, setCurrentPrompt] = useState('');
-  const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'offline'>('checking');
-  const [refetchMode, setRefetchMode] = useState<'reset' | 'append' | 'replace'>('reset');
-  const [connectionStatus, setConnectionStatus] = useState<string>('idle');
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [refetchMode, setRefetchMode] = useState<"reset" | "append" | "replace">("reset");
+  const [connectionStatus, setConnectionStatus] = useState<string>("idle");
 
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     return () => {
-      queryClient.cancelQueries({ queryKey: ['chat-stream'] });
+      queryClient.cancelQueries({ queryKey: ["chat-stream"] });
     };
   }, [queryClient]);
 
@@ -62,10 +62,10 @@ function StreamedQueryScreen() {
     const checkHealth = async () => {
       try {
         const isHealthy = await checkServerHealth();
-        setServerStatus(isHealthy ? 'online' : 'offline');
+        setServerStatus(isHealthy ? "online" : "offline");
       } catch (error) {
         console.error(error);
-        setServerStatus('offline');
+        setServerStatus("offline");
       }
     };
 
@@ -75,32 +75,32 @@ function StreamedQueryScreen() {
   }, []);
 
   const chatQueryOptions = queryOptions({
-    queryKey: ['chat-stream', currentPrompt],
+    queryKey: ["chat-stream", currentPrompt],
     queryFn: streamedQuery({
       streamFn: async function* (context) {
         if (!currentPrompt) return; // Should not happen due to enabled check
 
         const response = await fetch(`${SERVER_URL}/stream-chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: currentPrompt }),
           signal: context.signal,
         });
 
-        if (!response.body) throw new Error('No response body');
+        if (!response.body) throw new Error("No response body");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
+        let buffer = "";
 
         try {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            
+
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
               if (line.trim()) {
@@ -110,7 +110,7 @@ function StreamedQueryScreen() {
                     yield parsed.chunk;
                   }
                 } catch (e) {
-                  console.warn('JSON parse error:', e);
+                  console.warn("JSON parse error:", e);
                 }
               }
             }
@@ -121,7 +121,7 @@ function StreamedQueryScreen() {
       },
       refetchMode: refetchMode,
     }),
-    enabled: currentPrompt.length > 0 && serverStatus === 'online',
+    enabled: currentPrompt.length > 0 && serverStatus === "online",
     staleTime: Infinity,
     retry: false,
     gcTime: 0,
@@ -148,7 +148,7 @@ function StreamedQueryScreen() {
           ...prev,
           {
             id: messageId,
-            type: 'assistant' as const,
+            type: "assistant" as const,
             content: data,
             timestamp: new Date(),
             streaming: isFetching,
@@ -160,7 +160,7 @@ function StreamedQueryScreen() {
 
   useEffect(() => {
     if (chatQuery.data && currentPrompt) {
-      updateMessages(chatQuery.data, currentPrompt, chatQuery.fetchStatus === 'fetching');
+      updateMessages(chatQuery.data, currentPrompt, chatQuery.fetchStatus === "fetching");
       if (scrollViewportRef.current) {
         scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
       }
@@ -168,11 +168,11 @@ function StreamedQueryScreen() {
   }, [chatQuery.data, chatQuery.fetchStatus, currentPrompt, updateMessages]);
 
   const connectionStatusText = useMemo(() => {
-    if (chatQuery.status === 'pending') return 'Connecting...';
-    if (chatQuery.fetchStatus === 'fetching') return 'Streaming...';
+    if (chatQuery.status === "pending") return "Connecting...";
+    if (chatQuery.fetchStatus === "fetching") return "Streaming...";
     if (chatQuery.error) return `Error: ${(chatQuery.error as Error).message}`;
     if (chatQuery.data) return `Complete - ${chatQuery.data.length} chunks`;
-    return 'idle';
+    return "idle";
   }, [chatQuery.status, chatQuery.fetchStatus, chatQuery.error, chatQuery.data]);
 
   useEffect(() => {
@@ -180,16 +180,16 @@ function StreamedQueryScreen() {
   }, [connectionStatusText]);
 
   const handleSendMessage = () => {
-    if (userInput.trim() && serverStatus === 'online') {
+    if (userInput.trim() && serverStatus === "online") {
       const userMessage: ChatMessage = {
         id: `user-${Date.now()}`,
-        type: 'user',
+        type: "user",
         content: userInput,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, userMessage]);
       setCurrentPrompt(userInput);
-      setUserInput('');
+      setUserInput("");
     }
   };
 
@@ -205,183 +205,205 @@ function StreamedQueryScreen() {
 
   const resetChat = () => {
     setMessages([]);
-    setCurrentPrompt('');
-    setUserInput('');
-    queryClient.removeQueries({ queryKey: ['chat-stream'] });
+    setCurrentPrompt("");
+    setUserInput("");
+    queryClient.removeQueries({ queryKey: ["chat-stream"] });
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col gap-4 p-4 container mx-auto max-w-4xl">
+    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col gap-4 p-4">
       {/* Header */}
-      <div className="flex items-center justify-between rounded-xl border bg-card p-6 shadow-sm">
+      <div className="bg-card flex items-center justify-between rounded-xl border p-6 shadow-sm">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Streamed Query</h1>
-          <p className="text-sm text-muted-foreground">
-            TanStack Query <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">experimental_streamedQuery</span> Demo
+          <p className="text-muted-foreground text-sm">
+            TanStack Query{" "}
+            <span className="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">experimental_streamedQuery</span> Demo
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-full border">
-          <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", 
-            serverStatus === 'online' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 
-            serverStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500')} 
+        <div className="bg-muted/50 flex items-center gap-3 rounded-full border px-3 py-1.5">
+          <div
+            className={cn(
+              "h-2.5 w-2.5 animate-pulse rounded-full",
+              serverStatus === "online"
+                ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+                : serverStatus === "offline"
+                  ? "bg-red-500"
+                  : "bg-yellow-500",
+            )}
           />
           <span className="text-sm font-medium">
-             {serverStatus === 'online' ? 'System Online' : serverStatus === 'offline' ? 'System Offline' : 'Connecting...'}
+            {serverStatus === "online"
+              ? "System Online"
+              : serverStatus === "offline"
+                ? "System Offline"
+                : "Connecting..."}
           </span>
         </div>
       </div>
 
-       {/* Server Status Alert */}
-       {serverStatus === 'offline' && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-center gap-3">
+      {/* Server Status Alert */}
+      {serverStatus === "offline" && (
+        <div className="border-destructive/50 bg-destructive/10 text-destructive flex items-center gap-3 rounded-lg border p-4">
           <AlertTriangle className="h-5 w-5" />
           <div className="space-y-1">
-             <div className="font-semibold">Connection Failed</div>
-             <div className="text-xs opacity-90">Please ensure the streaming server is running on port 3001.</div>
+            <div className="font-semibold">Connection Failed</div>
+            <div className="text-xs opacity-90">Please ensure the streaming server is running on port 3001.</div>
           </div>
         </div>
       )}
 
       {/* Refetch Mode */}
       <Card>
-        <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-                <span className="text-sm font-medium">Strategy:</span>
-                <div className="flex bg-muted p-1 rounded-lg">
-                  {(['reset', 'append', 'replace'] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setRefetchMode(mode)}
-                      className={cn(
-                        "px-3 py-1 text-xs font-medium rounded-md transition-all",
-                        refetchMode === mode 
-                          ? "bg-background text-foreground shadow-sm" 
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {mode.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
+        <CardContent className="flex flex-col items-center justify-between gap-4 p-4 sm:flex-row">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium">Strategy:</span>
+            <div className="bg-muted flex rounded-lg p-1">
+              {(["reset", "append", "replace"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setRefetchMode(mode)}
+                  className={cn(
+                    "rounded-md px-3 py-1 text-xs font-medium transition-all",
+                    refetchMode === mode
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {mode.toUpperCase()}
+                </button>
+              ))}
             </div>
-            <span className="text-xs text-muted-foreground italic">
-                {refetchMode === 'reset' && 'Reset: Clears previous data before fetching.'}
-                {refetchMode === 'append' && 'Append: Adds new chunks to existing history.'}
-                {refetchMode === 'replace' && 'Replace: Swaps entire content on completion.'}
-            </span>
+          </div>
+          <span className="text-muted-foreground text-xs italic">
+            {refetchMode === "reset" && "Reset: Clears previous data before fetching."}
+            {refetchMode === "append" && "Append: Adds new chunks to existing history."}
+            {refetchMode === "replace" && "Replace: Swaps entire content on completion."}
+          </span>
         </CardContent>
       </Card>
 
       {/* Chat Area */}
-      <Card className="flex-1 overflow-hidden flex flex-col shadow-md border-muted/60">
+      <Card className="border-muted/60 flex flex-1 flex-col overflow-hidden shadow-md">
         <ScrollArea className="flex-1 p-4" viewportRef={scrollViewportRef}>
-            {messages.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-6 opacity-60">
-                    <div className="p-4 bg-muted/50 rounded-full">
-                        <Monitor className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <div className="max-w-md space-y-2">
-                        <h3 className="font-semibold text-lg">Ready to Stream</h3>
-                        <p className="text-sm text-muted-foreground">
-                            This demo uses AsyncIterables to stream responses byte-by-byte from the server.
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg">
-                        {samplePrompts.map((sample, index) => (
-                            <Button
-                                key={index}
-                                variant="outline"
-                                className="h-auto py-3 justify-start gap-3 bg-background/50 hover:bg-muted/80"
-                                onClick={() => handleSamplePrompt(sample.text)}
-                                disabled={serverStatus !== 'online'}
-                            >
-                                {sample.icon}
-                                <span className="text-xs">{sample.text}</span>
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <div className="space-y-6 pb-4">
-                {messages.map((message) => (
-                    <div key={message.id} className={cn("flex w-full gap-3", message.type === 'user' ? "justify-end" : "justify-start")}>
-                        {message.type === 'assistant' && (
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                <Rocket className="h-4 w-4 text-primary" />
-                            </div>
-                        )}
-                        
-                        <div className={cn("max-w-[80%] rounded-2xl p-4 shadow-sm", 
-                            message.type === 'user' 
-                                ? "bg-primary text-primary-foreground rounded-tr-sm" 
-                                : "bg-muted/50 border border-border rounded-tl-sm")}
-                        >
-                            <div className="whitespace-pre-wrap leading-relaxed text-sm">
-                                {Array.isArray(message.content) 
-                                    ? message.content.join('') 
-                                    : message.content}
-                                {message.streaming && (
-                                  <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-primary/50 animate-pulse"/>
-                                )}
-                            </div>
-                            
-                             {message.type === 'assistant' && !message.streaming && (
-                                <div className="mt-3 flex justify-between items-center border-t pt-2 gap-4">
-                                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                                         {Array.isArray(message.content) ? message.content.length : 0} chunks received
-                                     </span>
-                                     <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-background" onClick={handleRefetch}>
-                                         <RefreshCw className="h-3 w-3" />
-                                     </Button>
-                                </div>
-                             )}
-                        </div>
-
-                        {message.type === 'user' && (
-                            <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
-                                <span className="text-xs font-bold">ME</span>
-                            </div>
-                        )}
-                    </div>
+          {messages.length === 0 && (
+            <div className="flex h-full flex-col items-center justify-center space-y-6 p-8 text-center opacity-60">
+              <div className="bg-muted/50 rounded-full p-4">
+                <Monitor className="text-muted-foreground h-8 w-8" />
+              </div>
+              <div className="max-w-md space-y-2">
+                <h3 className="text-lg font-semibold">Ready to Stream</h3>
+                <p className="text-muted-foreground text-sm">
+                  This demo uses AsyncIterables to stream responses byte-by-byte from the server.
+                </p>
+              </div>
+              <div className="grid w-full max-w-lg grid-cols-1 gap-3 md:grid-cols-2">
+                {samplePrompts.map((sample, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    className="bg-background/50 hover:bg-muted/80 h-auto justify-start gap-3 py-3"
+                    onClick={() => handleSamplePrompt(sample.text)}
+                    disabled={serverStatus !== "online"}
+                  >
+                    {sample.icon}
+                    <span className="text-xs">{sample.text}</span>
+                  </Button>
                 ))}
+              </div>
             </div>
+          )}
+
+          <div className="space-y-6 pb-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn("flex w-full gap-3", message.type === "user" ? "justify-end" : "justify-start")}
+              >
+                {message.type === "assistant" && (
+                  <div className="bg-primary/10 border-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border">
+                    <Rocket className="text-primary h-4 w-4" />
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    "max-w-[80%] rounded-2xl p-4 shadow-sm",
+                    message.type === "user"
+                      ? "bg-primary text-primary-foreground rounded-tr-sm"
+                      : "bg-muted/50 border-border rounded-tl-sm border",
+                  )}
+                >
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {Array.isArray(message.content) ? message.content.join("") : message.content}
+                    {message.streaming && (
+                      <span className="bg-primary/50 ml-1 inline-block h-4 w-1.5 animate-pulse align-middle" />
+                    )}
+                  </div>
+
+                  {message.type === "assistant" && !message.streaming && (
+                    <div className="mt-3 flex items-center justify-between gap-4 border-t pt-2">
+                      <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+                        {Array.isArray(message.content) ? message.content.length : 0} chunks received
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-background h-6 w-6"
+                        onClick={handleRefetch}
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {message.type === "user" && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white">
+                    <span className="text-xs font-bold">ME</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </ScrollArea>
 
-        <div className="p-4 border-t bg-muted/20 backdrop-blur-sm">
-             <div className="flex gap-2 relative">
-                 <Input 
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder={serverStatus === 'online' ? "Type your prompt here..." : "Server unavailable"}
-                    disabled={chatQuery.fetchStatus === 'fetching' || serverStatus !== 'online'}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="pr-12 shadow-sm bg-background"
-                 />
-                 <div className="absolute right-1 top-1">
-                    {userInput.trim() ? (
-                        <Button size="icon" className="h-8 w-8" onClick={handleSendMessage} disabled={chatQuery.fetchStatus === 'fetching'}>
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    ) : (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetChat} title="Reset Chat">
-                            <RefreshCw className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                    )}
-                 </div>
-             </div>
-             <div className="mt-3 flex justify-between items-center text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-                 <div className="flex gap-4">
-                    <span>Status: {chatQuery.status}</span> 
-                    <span>State: {chatQuery.fetchStatus}</span>
-                 </div>
-                 <span className={cn(
-                     "transition-colors",
-                     chatQuery.fetchStatus === 'fetching' ? "text-primary" : ""
-                 )}>
-                     {connectionStatus}
-                 </span>
-             </div>
+        <div className="bg-muted/20 border-t p-4 backdrop-blur-sm">
+          <div className="relative flex gap-2">
+            <Input
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder={serverStatus === "online" ? "Type your prompt here..." : "Server unavailable"}
+              disabled={chatQuery.fetchStatus === "fetching" || serverStatus !== "online"}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              className="bg-background pr-12 shadow-sm"
+            />
+            <div className="absolute top-1 right-1">
+              {userInput.trim() ? (
+                <Button
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleSendMessage}
+                  disabled={chatQuery.fetchStatus === "fetching"}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetChat} title="Reset Chat">
+                  <RefreshCw className="text-muted-foreground h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="text-muted-foreground mt-3 flex items-center justify-between text-[10px] font-medium tracking-widest uppercase">
+            <div className="flex gap-4">
+              <span>Status: {chatQuery.status}</span>
+              <span>State: {chatQuery.fetchStatus}</span>
+            </div>
+            <span className={cn("transition-colors", chatQuery.fetchStatus === "fetching" ? "text-primary" : "")}>
+              {connectionStatus}
+            </span>
+          </div>
         </div>
       </Card>
     </div>

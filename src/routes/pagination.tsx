@@ -1,30 +1,23 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import commodityService from '@/services/commodity';
-import { PulsingDot } from '@/components/pulsing-dot';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import commodityService from "@/services/commodity";
+import { PulsingDot } from "@/components/pulsing-dot";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export const Route = createFileRoute('/pagination')({
+export const Route = createFileRoute("/pagination")({
   component: PaginationScreen,
-})
+});
 
 function PaginationScreen() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const { data, isRefetching, isFetching, isError, error } = useQuery({
-    queryKey: ['commodities', page, pageSize],
+    queryKey: ["commodities", page, pageSize],
     queryFn: () => commodityService.getCommodities(page, pageSize),
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 1, // 1 minute
@@ -36,7 +29,7 @@ function PaginationScreen() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
+    <div className="container mx-auto space-y-4 p-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Page {page}</CardTitle>
@@ -44,9 +37,9 @@ function PaginationScreen() {
         </CardHeader>
         <CardContent>
           {isError && (
-             <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-800">
-               Error: {error instanceof Error ? error.message : 'Failed to load data'}
-             </div>
+            <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-800">
+              Error: {error instanceof Error ? error.message : "Failed to load data"}
+            </div>
           )}
 
           <div className="rounded-md border">
@@ -90,8 +83,8 @@ function PaginationScreen() {
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
-            <div className="flex-1 text-center text-sm text-muted-foreground">
-                Page {page} {data?.next ? 'of many' : ''} • Showing {data?.data.length || 0} items
+            <div className="text-muted-foreground flex-1 text-center text-sm">
+              Page {page} {data?.next ? "of many" : ""} • Showing {data?.data.length || 0} items
             </div>
             <Button
               variant="outline"

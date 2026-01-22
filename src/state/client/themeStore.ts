@@ -1,8 +1,9 @@
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
-import { persist } from 'zustand/middleware';
+import { useEffect } from "react";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
+import { persist } from "zustand/middleware";
 
-export type Theme = 'light' | 'dark' | 'dim';
+export type Theme = "light" | "dark" | "dim";
 
 interface ThemeState {
   theme: Theme;
@@ -12,10 +13,10 @@ interface ThemeState {
 
 /**
  * Theme Store
- * 
+ *
  * A Zustand store with Immer middleware for immutable state updates
  * and persist middleware for localStorage persistence.
- * 
+ *
  * Best Practices Applied:
  * 1. Type-safe state and actions
  * 2. Immer middleware for clean, immutable updates
@@ -25,29 +26,29 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     immer((set) => ({
-      theme: 'light',
-      
+      theme: "light",
+
       // Immer allows us to write "mutating" logic that becomes immutable
       setTheme: (theme) =>
         set((state) => {
           state.theme = theme;
         }),
-      
+
       // Cycle through themes: light -> dark -> dim -> light
       toggleTheme: () =>
         set((state) => {
-          const themeOrder: Theme[] = ['light', 'dark', 'dim'];
+          const themeOrder: Theme[] = ["light", "dark", "dim"];
           const currentIndex = themeOrder.indexOf(state.theme);
           const nextIndex = (currentIndex + 1) % themeOrder.length;
           state.theme = themeOrder[nextIndex];
         }),
     })),
     {
-      name: 'theme-storage', // localStorage key
+      name: "theme-storage", // localStorage key
       // Only persist the theme value, not the functions
       partialize: (state) => ({ theme: state.theme }),
-    }
-  )
+    },
+  ),
 );
 
 /**
@@ -56,16 +57,19 @@ export const useThemeStore = create<ThemeState>()(
  */
 export function useApplyTheme() {
   const theme = useThemeStore((state) => state.theme);
-  
-  // Apply theme class to document root
-  if (typeof document !== 'undefined') {
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
     // Remove all theme classes first
-    document.documentElement.classList.remove('light', 'dark', 'dim');
+    document.documentElement.classList.remove("light", "dark", "dim");
     // Add current theme class
     document.documentElement.classList.add(theme);
     // Also set data attribute for CSS selectors
-    document.documentElement.setAttribute('data-theme', theme);
-  }
-  
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   return theme;
 }

@@ -1,27 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { reportQueries } from '@/state/server/queries/reportQueries'
-import { ReportsSkeleton } from './-skeletons/reports-skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { reportQueries } from "@/state/server/queries/reportQueries";
+import { ReportsSkeleton } from "./-skeletons/reports-skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export const Route = createFileRoute('/suspense-query/')({
+export const Route = createFileRoute("/suspense-query/")({
   component: RouteComponent,
   pendingComponent: ReportsSkeleton,
   loader: ({ context }) => {
     // adding async and await here will show blank page when users refresh the browser
-    void context.queryClient.ensureQueryData(reportQueries.list())
+    void context.queryClient.ensureQueryData(reportQueries.list());
   },
-})
+});
 
 function RouteComponent() {
-  const { data: reports } = useSuspenseQuery(reportQueries.list())
+  const { data: reports } = useSuspenseQuery(reportQueries.list());
 
   return (
     <div className="container mx-auto py-8">
@@ -57,5 +50,5 @@ function RouteComponent() {
         </Table>
       </div>
     </div>
-  )
+  );
 }
