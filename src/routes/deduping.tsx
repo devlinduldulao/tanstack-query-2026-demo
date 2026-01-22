@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react';
-import SampleA from '@/components/SampleA';
-import SampleB from '@/components/SampleB';
-import { PulsingDot } from '@/components/PulsingDot';
+import SampleA from '@/components/sample-a';
+import SampleB from '@/components/sample-b';
+import { PulsingDot } from '@/components/pulsing-dot';
 import { useDedupeQuery } from '@/state/server/queries/dedupeQueries';
 import dedupeService from '@/services/dedupe';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';

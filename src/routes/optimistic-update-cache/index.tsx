@@ -5,7 +5,7 @@ import type { Movie } from '@/models';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash2, Eye, Star, Clapperboard } from 'lucide-react';
-import { PulsingDot } from '@/components/PulsingDot';
+import { PulsingDot } from '@/components/pulsing-dot';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import commodityService from '@/services/commodity';
-import { PulsingDot } from '@/components/PulsingDot';
+import { PulsingDot } from '@/components/pulsing-dot';
 import {
   Table,
   TableBody,

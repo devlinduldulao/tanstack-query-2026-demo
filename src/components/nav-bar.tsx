@@ -10,6 +10,7 @@ import {
   SheetTitle, 
 } from "@/components/ui/sheet"
 import { buttonVariants } from "@/components/ui/button"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 // Matches Angular pathNames but fully expanded for React Router
 const items = [
@@ -46,6 +47,11 @@ export function NavBar() {
               </Link>
             ))}
           </nav>
+        </div>
+
+        {/* Theme Switcher */}
+        <div className="ml-auto flex items-center">
+          <ThemeSwitcher />
         </div>
 
         {/* Mobile Menu */}

@@ -1,5 +1,5 @@
 import { useDedupeQuery } from '@/state/server/queries/dedupeQueries';
-import { PulsingDot } from './PulsingDot';
+import { PulsingDot } from './pulsing-dot';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SampleA() {
