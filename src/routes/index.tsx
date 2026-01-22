@@ -62,11 +62,10 @@ function IndexComponent() {
     <div className="container mx-auto p-8 space-y-8">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-          TanStack Query v5 Demo
+          TanStack Query Demo
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          A collection of practical examples showcasing the power of TanStack Query with React 19, 
-          TanStack Router, and Shadcn UI.
+          A collection of practical examples showcasing the power of TanStack Query with React.
         </p>
       </div>
 

@@ -34,7 +34,7 @@ export function NavBar() {
         {/* Desktop Menu */}
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2 font-bold select-none text-lg">
-             <span>Query v5 Demo</span>
+             <span>React Miami 26</span>
           </Link>
           <nav className="flex items-center gap-4 text-sm font-medium lg:gap-6">
             {items.filter(i => i.to !== '/').map((item) => (
