@@ -12,7 +12,9 @@ import { Route as PaginationRouteImport } from './routes/pagination'
 import { Route as InfiniteScrollingRouteImport } from './routes/infinite-scrolling'
 import { Route as DedupingRouteImport } from './routes/deduping'
 import { Route as BroadcastRouteImport } from './routes/broadcast'
+import { Route as SuspenseQueryRouteRouteImport } from './routes/suspense-query/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuspenseQueryIndexRouteImport } from './routes/suspense-query/index'
 import { Route as PrefetchingIndexRouteImport } from './routes/prefetching/index'
 import { Route as PollingIndexRouteImport } from './routes/polling/index'
 import { Route as OptimisticUpdateCacheIndexRouteImport } from './routes/optimistic-update-cache/index'
@@ -45,10 +47,20 @@ const BroadcastRoute = BroadcastRouteImport.update({
   path: '/broadcast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuspenseQueryRouteRoute = SuspenseQueryRouteRouteImport.update({
+  id: '/suspense-query',
+  path: '/suspense-query',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SuspenseQueryIndexRoute = SuspenseQueryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuspenseQueryRouteRoute,
 } as any)
 const PrefetchingIndexRoute = PrefetchingIndexRouteImport.update({
   id: '/prefetching/',
@@ -85,6 +97,7 @@ const OptimisticUpdateCacheIdIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/suspense-query': typeof SuspenseQueryRouteRouteWithChildren
   '/broadcast': typeof BroadcastRoute
   '/deduping': typeof DedupingRoute
   '/infinite-scrolling': typeof InfiniteScrollingRoute
@@ -94,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/optimistic-update-cache/': typeof OptimisticUpdateCacheIndexRoute
   '/polling/': typeof PollingIndexRoute
   '/prefetching/': typeof PrefetchingIndexRoute
+  '/suspense-query/': typeof SuspenseQueryIndexRoute
   '/optimistic-update-cache/$id/': typeof OptimisticUpdateCacheIdIndexRoute
   '/prefetching/$id/': typeof PrefetchingIdIndexRoute
 }
@@ -108,12 +122,14 @@ export interface FileRoutesByTo {
   '/optimistic-update-cache': typeof OptimisticUpdateCacheIndexRoute
   '/polling': typeof PollingIndexRoute
   '/prefetching': typeof PrefetchingIndexRoute
+  '/suspense-query': typeof SuspenseQueryIndexRoute
   '/optimistic-update-cache/$id': typeof OptimisticUpdateCacheIdIndexRoute
   '/prefetching/$id': typeof PrefetchingIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/suspense-query': typeof SuspenseQueryRouteRouteWithChildren
   '/broadcast': typeof BroadcastRoute
   '/deduping': typeof DedupingRoute
   '/infinite-scrolling': typeof InfiniteScrollingRoute
@@ -123,6 +139,7 @@ export interface FileRoutesById {
   '/optimistic-update-cache/': typeof OptimisticUpdateCacheIndexRoute
   '/polling/': typeof PollingIndexRoute
   '/prefetching/': typeof PrefetchingIndexRoute
+  '/suspense-query/': typeof SuspenseQueryIndexRoute
   '/optimistic-update-cache/$id/': typeof OptimisticUpdateCacheIdIndexRoute
   '/prefetching/$id/': typeof PrefetchingIdIndexRoute
 }
@@ -130,6 +147,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/suspense-query'
     | '/broadcast'
     | '/deduping'
     | '/infinite-scrolling'
@@ -139,6 +157,7 @@ export interface FileRouteTypes {
     | '/optimistic-update-cache/'
     | '/polling/'
     | '/prefetching/'
+    | '/suspense-query/'
     | '/optimistic-update-cache/$id/'
     | '/prefetching/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -153,11 +172,13 @@ export interface FileRouteTypes {
     | '/optimistic-update-cache'
     | '/polling'
     | '/prefetching'
+    | '/suspense-query'
     | '/optimistic-update-cache/$id'
     | '/prefetching/$id'
   id:
     | '__root__'
     | '/'
+    | '/suspense-query'
     | '/broadcast'
     | '/deduping'
     | '/infinite-scrolling'
@@ -167,12 +188,14 @@ export interface FileRouteTypes {
     | '/optimistic-update-cache/'
     | '/polling/'
     | '/prefetching/'
+    | '/suspense-query/'
     | '/optimistic-update-cache/$id/'
     | '/prefetching/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SuspenseQueryRouteRoute: typeof SuspenseQueryRouteRouteWithChildren
   BroadcastRoute: typeof BroadcastRoute
   DedupingRoute: typeof DedupingRoute
   InfiniteScrollingRoute: typeof InfiniteScrollingRoute
@@ -223,12 +246,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BroadcastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suspense-query': {
+      id: '/suspense-query'
+      path: '/suspense-query'
+      fullPath: '/suspense-query'
+      preLoaderRoute: typeof SuspenseQueryRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/suspense-query/': {
+      id: '/suspense-query/'
+      path: '/'
+      fullPath: '/suspense-query/'
+      preLoaderRoute: typeof SuspenseQueryIndexRouteImport
+      parentRoute: typeof SuspenseQueryRouteRoute
     }
     '/prefetching/': {
       id: '/prefetching/'
@@ -275,8 +312,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SuspenseQueryRouteRouteChildren {
+  SuspenseQueryIndexRoute: typeof SuspenseQueryIndexRoute
+}
+
+const SuspenseQueryRouteRouteChildren: SuspenseQueryRouteRouteChildren = {
+  SuspenseQueryIndexRoute: SuspenseQueryIndexRoute,
+}
+
+const SuspenseQueryRouteRouteWithChildren =
+  SuspenseQueryRouteRoute._addFileChildren(SuspenseQueryRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SuspenseQueryRouteRoute: SuspenseQueryRouteRouteWithChildren,
   BroadcastRoute: BroadcastRoute,
   DedupingRoute: DedupingRoute,
   InfiniteScrollingRoute: InfiniteScrollingRoute,

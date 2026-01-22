@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowRight, Layers, List, Infinity as InfinityIcon, Radio, Zap, Clock, Bookmark, Share2 } from "lucide-react";
+import { ArrowRight, Layers, List, Infinity as InfinityIcon, Radio, Zap, Clock, Bookmark, Share2, Loader } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -56,6 +56,12 @@ function IndexComponent() {
         path: "/broadcast",
         icon: <Share2 className="h-6 w-6 text-indigo-500" />
      },
+    {
+       title: "Suspense Query",
+       description: "Render components with Suspense boundaries",
+       path: "/suspense-query",
+       icon: <Loader className="h-6 w-6 text-pink-500" />
+    },
   ];
 
   return (

@@ -23,6 +23,7 @@ const items = [
   { to: '/infinite-scrolling', label: 'Infinite Scroll' },
   { to: '/streamed-query', label: 'Streamed Query' },
   { to: '/broadcast', label: 'Broadcast' },
+  { to: '/suspense-query/', label: 'Suspense Query' },
 ]
 
 export function NavBar() {
