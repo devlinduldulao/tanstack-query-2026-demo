@@ -4,6 +4,8 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { NavBar } from "@/components/nav-bar";
 import { useApplyTheme } from "@/state/client/themeStore";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 type RouterContextType = {
   queryClient: QueryClient;
@@ -29,6 +31,8 @@ function RootComponent() {
     <>
       <NavBar />
       <Outlet />
+      <ReactQueryDevtools initialIsOpen={false} />
+      <TanStackRouterDevtools />
     </>
   );
 }
