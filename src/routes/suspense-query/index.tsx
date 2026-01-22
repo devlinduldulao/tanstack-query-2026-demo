@@ -14,9 +14,9 @@ import {
 export const Route = createFileRoute('/suspense-query/')({
   component: RouteComponent,
   pendingComponent: ReportsSkeleton,
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     // adding async and await here will show blank page when users refresh the browser
-    await context.queryClient.ensureQueryData(reportQueries.list())
+    void context.queryClient.ensureQueryData(reportQueries.list())
   },
 })
 
