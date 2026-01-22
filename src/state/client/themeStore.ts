@@ -5,6 +5,8 @@ import { persist } from "zustand/middleware";
 
 export type Theme = "light" | "dark" | "dim";
 
+const themeOrder: Theme[] = ["light", "dark", "dim"];
+
 interface ThemeState {
   theme: Theme;
   setTheme: (theme: Theme) => void;
@@ -37,7 +39,6 @@ export const useThemeStore = create<ThemeState>()(
       // Cycle through themes: light -> dark -> dim -> light
       toggleTheme: () =>
         set((state) => {
-          const themeOrder: Theme[] = ["light", "dark", "dim"];
           const currentIndex = themeOrder.indexOf(state.theme);
           const nextIndex = (currentIndex + 1) % themeOrder.length;
           state.theme = themeOrder[nextIndex];
@@ -63,11 +64,7 @@ export function useApplyTheme() {
       return;
     }
 
-    // Remove all theme classes first
-    document.documentElement.classList.remove("light", "dark", "dim");
-    // Add current theme class
-    document.documentElement.classList.add(theme);
-    // Also set data attribute for CSS selectors
+    // Set data attribute for Tailwind v4 custom variants and CSS variables
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
