@@ -23,78 +23,102 @@ function IndexComponent() {
       title: "Prefetching",
       description: "Preload data for faster navigation",
       path: "/prefetching",
-      icon: <Bookmark className="h-6 w-6 text-orange-500" />,
+      icon: <Bookmark className="h-8 w-8" />,
+      color: "bg-[oklch(0.85_0.15_40)]", // Yellow
     },
     {
       title: "Deduplication",
       description: "Request deduplication with multiple subscribers",
       path: "/deduping",
-      icon: <Layers className="h-6 w-6 text-blue-500" />,
+      icon: <Layers className="h-8 w-8" />,
+      color: "bg-[oklch(0.70_0.22_270)]", // Purple
     },
     {
       title: "Optimistic Updates",
       description: "Immediate UI updates before server confirmation",
       path: "/optimistic-update-cache",
-      icon: <Zap className="h-6 w-6 text-yellow-500" />,
+      icon: <Zap className="h-8 w-8" />,
+      color: "bg-[oklch(0.85_0.15_40)]", // Yellow
     },
     {
       title: "Polling",
       description: "Auto-refetching at specified intervals",
       path: "/polling",
-      icon: <Clock className="h-6 w-6 text-cyan-500" />,
+      icon: <Clock className="h-8 w-8" />,
+      color: "bg-[oklch(0.75_0.20_140)]", // Green
     },
     {
       title: "Pagination",
       description: "Paginated lists with keepPreviousData",
       path: "/pagination",
-      icon: <List className="h-6 w-6 text-green-500" />,
+      icon: <List className="h-8 w-8" />,
+      color: "bg-[oklch(0.75_0.20_140)]", // Green
     },
     {
       title: "Infinite Scrolling",
       description: "Load more data as you scroll",
       path: "/infinite-scrolling",
-      icon: <InfinityIcon className="h-6 w-6 text-purple-500" />,
+      icon: <InfinityIcon className="h-8 w-8" />,
+      color: "bg-[oklch(0.70_0.22_270)]", // Purple
     },
     {
       title: "Streamed Query",
       description: "Real-time AI-like streaming responses",
       path: "/streamed-query",
-      icon: <Radio className="h-6 w-6 text-red-500" />,
+      icon: <Radio className="h-8 w-8" />,
+      color: "bg-[oklch(0.75_0.20_340)]", // Pink/Red
     },
     {
       title: "Broadcast",
       description: "Sync state across tabs instantly",
       path: "/broadcast",
-      icon: <Share2 className="h-6 w-6 text-indigo-500" />,
+      icon: <Share2 className="h-8 w-8" />,
+      color: "bg-[oklch(0.75_0.20_340)]", // Pink/Red
     },
     {
       title: "Suspense Query",
       description: "Render components with Suspense boundaries",
       path: "/suspense-query",
-      icon: <Loader className="h-6 w-6 text-pink-500" />,
+      icon: <Loader className="h-8 w-8" />,
+      color: "bg-[oklch(0.70_0.22_270)]", // Purple
     },
   ];
 
   return (
-    <div className="container mx-auto space-y-8 p-8">
-      <div className="space-y-4 text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">TanStack Query Demo</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-xl">
+    <div className="container mx-auto space-y-12 p-8 pb-24">
+      <div className="space-y-6 text-center">
+        <h1 className="font-display text-5xl font-black tracking-tight uppercase lg:text-7xl">
+          <span className="brutal-shadow brutal-border-thick bg-primary text-primary-foreground inline-block -rotate-2 px-6 py-3">
+            TanStack
+          </span>
+          <br />
+          <span className="text-foreground mt-4 inline-block rotate-1">Query Demo</span>
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg font-bold tracking-wide uppercase">
           A collection of practical examples showcasing the power of TanStack Query with React.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {demos.map((demo) => (
-          <Link key={demo.path} to={demo.path} className="group">
-            <Card className="hover:border-primary/50 h-full transition-all duration-200 hover:shadow-lg">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {demos.map((demo, idx) => (
+          <Link
+            key={demo.path}
+            to={demo.path}
+            className="animate-brutal-slide-in group"
+            style={{ animationDelay: `${idx * 100}ms` }}
+          >
+            <Card className="brutal-border-thick brutal-shadow-lg hover:brutal-shadow-xl h-full transition-all duration-200 hover:-translate-y-1">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="rounded-lg bg-slate-100 p-2 dark:bg-slate-800">{demo.icon}</div>
-                  <ArrowRight className="text-muted-foreground group-hover:text-primary h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <div className="flex items-start justify-between">
+                  <div
+                    className={`brutal-border brutal-shadow flex h-16 w-16 items-center justify-center rounded ${demo.color} text-foreground transition-transform group-hover:scale-110 group-hover:rotate-6`}
+                  >
+                    {demo.icon}
+                  </div>
+                  <ArrowRight className="text-muted-foreground group-hover:text-primary h-8 w-8 transition-transform group-hover:translate-x-2" />
                 </div>
-                <CardTitle className="mt-4">{demo.title}</CardTitle>
-                <CardDescription>{demo.description}</CardDescription>
+                <CardTitle className="font-display mt-6 text-2xl font-black uppercase">{demo.title}</CardTitle>
+                <CardDescription className="text-base font-bold">{demo.description}</CardDescription>
               </CardHeader>
             </Card>
           </Link>
