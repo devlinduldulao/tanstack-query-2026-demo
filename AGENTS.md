@@ -15,7 +15,7 @@
 | Forms         | React Hook Form + Zod    | 7.x + 4.x |
 | Testing       | Vitest + Testing Library | Latest    |
 | API Client    | @hey-api/openapi-ts      | 0.91.x    |
-| Icons         | Phosphor Icons           | 2.x       |
+| Icons         | Lucide React             | Latest    |
 | Auth          | Azure MSAL               | 5.x       |
 | Build         | Vite                     | 8.x       |
 
@@ -67,8 +67,8 @@ src/
 ### Imports
 
 ```typescript
-// ✅ Correct - Direct imports from @phosphor-icons/react
-import { MoonIcon, SunIcon } from "@phosphor-icons/react";
+// ✅ Correct - Direct imports from lucide-react
+import { Moon as MoonIcon, Sun as SunIcon } from "lucide-react";
 
 // ✅ Correct - Generated API hooks
 import { applicationGetOptions } from "@/api/client/@tanstack/react-query.gen";

@@ -38,7 +38,7 @@ Reference these guidelines when:
 | **Validation**       | Zod                           | 4.x     |
 | **Testing**          | Vitest + Testing Library      | Latest  |
 | **API Client**       | Hey API (@hey-api/openapi-ts) | 0.91.x  |
-| **Icons**            | Phosphor Icons                | 2.x     |
+| **Icons**            | Lucide React                  | Latest  |
 | **Auth**             | Azure MSAL                    | 5.x     |
 | **Build**            | Vite                          | 8.x     |
 
@@ -302,10 +302,10 @@ Always use CSS theme variables:
 
 ### Icon Convention
 
-Use Phosphor Icons with `Icon` suffix:
+Use Lucide React with `Icon` suffix:
 
 ```typescript
-import { MoonIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
+import { Moon as MoonIcon, Check as CheckIcon, Plus as PlusIcon } from "lucide-react";
 
 <Button>
   <PlusIcon className="mr-2 size-4" />
