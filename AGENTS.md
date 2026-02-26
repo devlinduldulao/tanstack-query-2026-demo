@@ -1,4 +1,4 @@
-# ThisProject UI - Agent Instructions
+# ThisProject - Agent Instructions
 
 > IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any tasks in this project.
 
@@ -62,17 +62,35 @@ src/
 - **Variables/Functions**: `camelCase` (NEVER `snake_case`)
 - **Components/Types**: `PascalCase`
 - **Constants**: `UPPER_SNAKE_CASE`
-- **Icons**: Import with `Icon` suffix (e.g., `MoonIcon`, `CheckIcon`)
+- **Icons**: Use standard Lucide names (e.g., `Moon`, `Check`)
 
 ### TypeScript Types
 
-- Use `type` aliases instead of `interface` for project-defined types.
+- Use `type` aliases instead of `interface` declarations.
+- This project standard is: **types only** for object shapes, unions, and composition.
+- Prefer:
+
+```ts
+type User = {
+  id: string;
+  name: string;
+};
+```
+
+- Avoid:
+
+```ts
+interface User {
+  id: string;
+  name: string;
+}
+```
 
 ### Imports
 
 ```typescript
 // ✅ Correct - Direct imports from lucide-react
-import { Moon as MoonIcon, Sun as SunIcon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 // ✅ Correct - Generated API hooks
 import { applicationGetOptions } from "@/api/client/@tanstack/react-query.gen";
