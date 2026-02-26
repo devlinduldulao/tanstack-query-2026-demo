@@ -64,6 +64,10 @@ src/
 - **Constants**: `UPPER_SNAKE_CASE`
 - **Icons**: Import with `Icon` suffix (e.g., `MoonIcon`, `CheckIcon`)
 
+### TypeScript Types
+
+- Use `type` aliases instead of `interface` for project-defined types.
+
 ### Imports
 
 ```typescript
