@@ -196,3 +196,11 @@ npm run typecheck  # Verify no breaking changes
 - Add/update tests for any code changes
 - Use descriptive commit messages
 - Title format: `[component/feature] Description`
+
+## Quality Gates
+
+- After any new feature, bug fix, or refactor, always run `npm run lint`, `npm run typecheck`, and `npm run test`
+- Do not consider the task complete until these checks pass, unless the user explicitly asks not to run them or the environment prevents it
+- Every new feature must include automated tests that cover the new behavior, including both happy paths and unhappy paths where practical
+- Bug fixes should include a regression test when practical
+- Refactors must keep existing tests passing and should add tests if behavior changes or previously untested behavior becomes important
