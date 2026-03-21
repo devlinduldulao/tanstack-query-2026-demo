@@ -8,6 +8,7 @@ import { Trash2, Eye, Star, Clapperboard } from "lucide-react";
 import { PulsingDot } from "@/components/pulsing-dot";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getMoviePosterUrl } from "@/lib/movie-poster";
 
 export const Route = createFileRoute("/optimistic-update-cache/")({
   component: MoviesScreen,
@@ -87,10 +88,10 @@ function MoviesScreen() {
               <CardContent className="flex h-full p-0">
                 <div className="relative shrink-0">
                   <img
-                    src={movie.imageUrl}
+                    src={getMoviePosterUrl(movie.imageUrl)}
                     alt={movie.title}
                     className="h-full w-[110px] object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute top-2 left-2">
                     <Badge

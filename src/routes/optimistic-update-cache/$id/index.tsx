@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getMoviePosterUrl } from "@/lib/movie-poster";
 
 export const Route = createFileRoute("/optimistic-update-cache/$id/")({
   component: MovieDetailScreen,
@@ -48,7 +49,12 @@ function MovieDetailScreen() {
 
       <Card>
         <CardContent className="flex flex-col gap-6 p-6 md:flex-row">
-          <img src={movie.imageUrl} alt={movie.title} className="h-[300px] w-[200px] rounded object-cover shadow-md" />
+          <img
+            src={getMoviePosterUrl(movie.imageUrl)}
+            alt={movie.title}
+            className="h-75 w-50 rounded object-cover shadow-md"
+            decoding="async"
+          />
           <div className="flex-1 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-3xl font-bold">{movie.title}</span>
@@ -77,10 +83,10 @@ function MovieDetailScreen() {
                 <div className="flex flex-wrap gap-1">
                   {Array.isArray(movie.genre)
                     ? movie.genre.map((g) => (
-                        <Badge key={g} variant="outline">
-                          {g}
-                        </Badge>
-                      ))
+                      <Badge key={g} variant="outline">
+                        {g}
+                      </Badge>
+                    ))
                     : movie.genre}
                 </div>
               </div>
