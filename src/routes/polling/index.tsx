@@ -108,13 +108,13 @@ function PollingScreen() {
         </Card>
 
         <Card className="border-muted shadow-sm md:col-span-2">
-          <div className="max-h-[600px] overflow-auto rounded-md">
+          <div className="max-h-150 overflow-auto rounded-md">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/40 outline-border sticky top-0 z-10 outline outline-1">
-                  <TableHead className="w-[60px]">#</TableHead>
+                <TableRow className="bg-muted/40 outline-border sticky top-0 z-10 outline-1">
+                  <TableHead className="w-15">#</TableHead>
                   <TableHead>Task</TableHead>
-                  <TableHead className="w-[120px] text-right">Status</TableHead>
+                  <TableHead className="w-30 text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

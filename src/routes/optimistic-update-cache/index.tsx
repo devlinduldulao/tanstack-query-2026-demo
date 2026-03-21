@@ -71,7 +71,7 @@ function MoviesScreen() {
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="overflow-hidden">
               <CardContent className="flex gap-4 p-4">
-                <Skeleton className="h-[140px] w-[95px] rounded" />
+                <Skeleton className="h-35 w-23.75 rounded" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-1/4" />
@@ -90,7 +90,7 @@ function MoviesScreen() {
                   <img
                     src={getMoviePosterUrl(movie.imageUrl)}
                     alt={movie.title}
-                    className="h-full w-[110px] object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-27.5 object-cover transition-transform duration-500 group-hover:scale-105"
                     decoding="async"
                   />
                   <div className="absolute top-2 left-2">
@@ -139,7 +139,7 @@ function MoviesScreen() {
                   </div>
 
                   <div className="text-muted-foreground mt-4 flex items-center justify-between border-t pt-2 text-xs">
-                    <span className="max-w-[150px] truncate">Dir. {movie.director}</span>
+                    <span className="max-w-37.5 truncate">Dir. {movie.director}</span>
                     <span className="font-mono">{movie.duration} min</span>
                   </div>
                 </div>

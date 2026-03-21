@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { Send, RefreshCw, AlertTriangle, Monitor, Edit3, HelpCircle, Rocket } from "lucide-react";
+import { Send, RefreshCw, AlertTriangle, Monitor, Edit3, HelpCircle, Rocket, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/streamed-query")({
@@ -47,15 +47,34 @@ function StreamedQueryScreen() {
   const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
   const [refetchMode, setRefetchMode] = useState<"reset" | "append" | "replace">("reset");
   const [connectionStatus, setConnectionStatus] = useState<string>("idle");
+  const [streamWasStopped, setStreamWasStopped] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
   const queryClient = useQueryClient();
+
+  const updateAutoScrollPreference = useCallback(() => {
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const pageHeight = document.documentElement.scrollHeight;
+    shouldAutoScrollRef.current = pageHeight - scrollPosition < 160;
+  }, []);
 
   useEffect(() => {
     return () => {
       queryClient.cancelQueries({ queryKey: ["chat-stream"] });
     };
   }, [queryClient]);
+
+  useEffect(() => {
+    updateAutoScrollPreference();
+    window.addEventListener("scroll", updateAutoScrollPreference, { passive: true });
+    window.addEventListener("resize", updateAutoScrollPreference);
+
+    return () => {
+      window.removeEventListener("scroll", updateAutoScrollPreference);
+      window.removeEventListener("resize", updateAutoScrollPreference);
+    };
+  }, [updateAutoScrollPreference]);
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -160,17 +179,24 @@ function StreamedQueryScreen() {
   useEffect(() => {
     if (chatQuery.data && currentPrompt) {
       updateMessages(chatQuery.data, currentPrompt, chatQuery.fetchStatus === "fetching");
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+
+      if (shouldAutoScrollRef.current) {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: chatQuery.fetchStatus === "fetching" ? "auto" : "smooth",
+          block: "end",
+        });
+      }
     }
   }, [chatQuery.data, chatQuery.fetchStatus, currentPrompt, updateMessages]);
 
   const connectionStatusText = useMemo(() => {
     if (chatQuery.status === "pending") return "Connecting...";
     if (chatQuery.fetchStatus === "fetching") return "Streaming...";
+    if (streamWasStopped) return "Response stopped";
     if (chatQuery.error) return `Error: ${(chatQuery.error as Error).message}`;
-    if (chatQuery.data) return `Complete - ${chatQuery.data.length} chunks`;
-    return "idle";
-  }, [chatQuery.status, chatQuery.fetchStatus, chatQuery.error, chatQuery.data]);
+    if (chatQuery.data) return `Response complete • ${chatQuery.data.length} chunks`;
+    return "Ready for a prompt";
+  }, [chatQuery.status, chatQuery.fetchStatus, chatQuery.error, chatQuery.data, streamWasStopped]);
 
   useEffect(() => {
     setConnectionStatus(connectionStatusText);
@@ -178,6 +204,9 @@ function StreamedQueryScreen() {
 
   const handleSendMessage = () => {
     if (userInput.trim() && serverStatus === "online") {
+      setStreamWasStopped(false);
+      shouldAutoScrollRef.current = true;
+
       const userMessage: ChatMessage = {
         id: `user-${Date.now()}`,
         type: "user",
@@ -196,16 +225,58 @@ function StreamedQueryScreen() {
 
   const handleRefetch = () => {
     if (currentPrompt) {
+      setStreamWasStopped(false);
+      shouldAutoScrollRef.current = true;
       chatQuery.refetch();
     }
+  };
+
+  const handleStopStreaming = async () => {
+    if (chatQuery.fetchStatus !== "fetching") {
+      return;
+    }
+
+    await queryClient.cancelQueries({ queryKey: ["chat-stream"] });
+    setStreamWasStopped(true);
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.id === `msg-${currentPrompt}`
+          ? {
+            ...message,
+            streaming: false,
+          }
+          : message,
+      ),
+    );
   };
 
   const resetChat = () => {
     setMessages([]);
     setCurrentPrompt("");
     setUserInput("");
+    setStreamWasStopped(false);
     queryClient.removeQueries({ queryKey: ["chat-stream"] });
   };
+
+  const statusSummary = useMemo(() => {
+    if (chatQuery.fetchStatus === "fetching") {
+      return "Generating response";
+    }
+
+    if (streamWasStopped) {
+      return "Generation stopped";
+    }
+
+    if (chatQuery.error) {
+      return "Generation failed";
+    }
+
+    if (messages.length === 0) {
+      return "Awaiting your first prompt";
+    }
+
+    return "Ready for your next prompt";
+  }, [chatQuery.error, chatQuery.fetchStatus, messages.length, streamWasStopped]);
 
   return (
     <div className="container mx-auto max-w-4xl space-y-4 p-4 pb-8">
@@ -284,14 +355,14 @@ function StreamedQueryScreen() {
       <Card className="border-muted/60 shadow-md">
         <div className="p-4">
           {messages.length === 0 && (
-            <div className="flex min-h-[24rem] flex-col items-center justify-center space-y-6 p-8 text-center opacity-60">
+            <div className="flex min-h-96 flex-col items-center justify-center space-y-6 p-8 text-center opacity-60">
               <div className="bg-muted/50 rounded-full p-4">
                 <Monitor className="text-muted-foreground h-8 w-8" />
               </div>
               <div className="max-w-md space-y-2">
                 <h3 className="text-lg font-semibold">Ready to Stream</h3>
                 <p className="text-muted-foreground text-sm">
-                  This demo uses AsyncIterables to stream responses byte-by-byte from the server.
+                  Responses arrive progressively from the server, so you can read while the answer is still being generated.
                 </p>
               </div>
               <div className="grid w-full max-w-lg grid-cols-1 gap-3 md:grid-cols-2">
@@ -378,12 +449,21 @@ function StreamedQueryScreen() {
                 className="bg-background h-10 pr-14 shadow-sm"
               />
               <div className="absolute top-1/2 right-1.5 -translate-y-1/2">
-                {userInput.trim() ? (
+                {chatQuery.fetchStatus === "fetching" ? (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-7 w-7 shadow-none"
+                    onClick={handleStopStreaming}
+                    title="Stop generating"
+                  >
+                    <Square className="h-3 w-3 fill-current" />
+                  </Button>
+                ) : userInput.trim() ? (
                   <Button
                     size="icon"
                     className="h-7 w-7 shadow-none"
                     onClick={handleSendMessage}
-                    disabled={chatQuery.fetchStatus === "fetching"}
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -403,8 +483,7 @@ function StreamedQueryScreen() {
           </div>
           <div className="text-muted-foreground mt-3 flex items-center justify-between text-[10px] font-medium tracking-widest uppercase">
             <div className="flex gap-4">
-              <span>Status: {chatQuery.status}</span>
-              <span>State: {chatQuery.fetchStatus}</span>
+              <span>{statusSummary}</span>
             </div>
             <span className={cn("transition-colors", chatQuery.fetchStatus === "fetching" ? "text-primary" : "")}>
               {connectionStatus}

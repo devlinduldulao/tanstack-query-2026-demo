@@ -68,7 +68,7 @@ function InfiniteScrollingScreen() {
                 key={commodity.id}
                 className="group hover:border-primary/50 overflow-hidden transition-all hover:shadow-md"
               >
-                <div className="from-muted to-muted group-hover:from-primary/80 group-hover:to-primary/20 h-2 w-full bg-gradient-to-r transition-all duration-500" />
+                <div className="from-muted to-muted group-hover:from-primary/80 group-hover:to-primary/20 h-2 w-full bg-linear-to-r transition-all duration-500" />
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <Badge variant="outline" className="text-muted-foreground h-5 px-1.5 py-0 text-[10px]">

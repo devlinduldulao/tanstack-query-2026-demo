@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Globe, Laptop, RefreshCw, Share2, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/broadcast")({
  */
 function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   const queryClient = useQueryClient();
-  const queryKey = ["shared", key];
+  const queryKey = useMemo(() => ["shared", key] as const, [key]);
 
   // 1. STATE HOLDER (The Query)
   // We use useQuery to hold the state. This gives us caching, devtools inspection,
@@ -57,7 +57,7 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
       if (stored) {
         try {
           return JSON.parse(stored).data;
-        } catch (e) {
+        } catch {
           return initialData;
         }
       }
@@ -198,7 +198,11 @@ function BroadcastScreen() {
 
               <div className="space-y-4">
                 <Label className="text-base">Shared Theme Preference</Label>
-                <RadioGroup value={sharedTheme} onValueChange={(v) => setSharedTheme(v as any)} className="flex gap-4">
+                <RadioGroup
+                  value={sharedTheme}
+                  onValueChange={(value) => setSharedTheme(value as "light" | "dark" | "blue")}
+                  className="flex gap-4"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="light" id="light" />
                     <Label htmlFor="light">Light Mode</Label>
