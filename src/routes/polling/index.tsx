@@ -143,7 +143,7 @@ function PollingScreen() {
                       ) : (
                         <Badge variant="outline" className="text-muted-foreground gap-1 pl-1.5">
                           <Circle className="h-3 w-3" />
-                          Pending
+                          On going
                         </Badge>
                       )}
                     </TableCell>
