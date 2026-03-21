@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSyncExternalStore } from "react";
 import reportService from "@/services/report";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +19,25 @@ function ReportsScreen() {
   });
 
   const queryClient = useQueryClient();
-  const getCachedData = (id: string) => queryClient.getQueryData(["report", id]);
+  useSyncExternalStore(
+    (onStoreChange) =>
+      queryClient.getQueryCache().subscribe((event) => {
+        if (event.query.queryKey[0] === "report") {
+          onStoreChange();
+        }
+      }),
+    () =>
+      queryClient
+        .getQueryCache()
+        .findAll({ queryKey: ["report"] })
+        .map((query) => `${query.queryHash}:${query.state.status}:${query.state.dataUpdatedAt}`)
+        .join("|"),
+    () => "",
+  );
 
-  const handlePreFetch = async (reportId: string) => {
+  const isReportPrefetched = (id: string) => queryClient.getQueryState(["report", id])?.status === "success";
+
+  const handlePrefetch = async (reportId: string) => {
     await queryClient.prefetchQuery({
       queryKey: ["report", String(reportId)],
       queryFn: () => reportService.getReportById(reportId),
@@ -50,7 +67,7 @@ function ReportsScreen() {
 
       <div className="grid gap-3">
         {reportsQuery.data?.map((item) => {
-          const isCached = !!getCachedData(String(item.id));
+          const isCached = isReportPrefetched(String(item.id));
 
           return (
             <Link
@@ -58,7 +75,7 @@ function ReportsScreen() {
               to="/prefetching/$id"
               params={{ id: String(item.id) }}
               className="group block"
-              onMouseEnter={() => handlePreFetch(String(item.id))}
+              onMouseEnter={() => void handlePrefetch(String(item.id))}
             >
               <Card className="hover:border-primary/50 border-muted transition-all hover:shadow-md">
                 <CardContent className="flex items-center justify-between p-4">
