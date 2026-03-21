@@ -7,9 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/suspense-query/")({
   component: RouteComponent,
   pendingComponent: ReportsSkeleton,
-  loader: ({ context }) => {
+  loader: async ({ context }) => {
     // adding async and await here will show blank page when users refresh the browser
-    void context.queryClient.ensureQueryData(reportQueries.list());
+    await context.queryClient.ensureQueryData(reportQueries.list());
   },
 });
 

@@ -5,7 +5,6 @@ import { experimental_streamedQuery as streamedQuery } from "@tanstack/react-que
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { Send, RefreshCw, AlertTriangle, Monitor, Edit3, HelpCircle, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,7 +48,7 @@ function StreamedQueryScreen() {
   const [refetchMode, setRefetchMode] = useState<"reset" | "append" | "replace">("reset");
   const [connectionStatus, setConnectionStatus] = useState<string>("idle");
 
-  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -161,9 +160,7 @@ function StreamedQueryScreen() {
   useEffect(() => {
     if (chatQuery.data && currentPrompt) {
       updateMessages(chatQuery.data, currentPrompt, chatQuery.fetchStatus === "fetching");
-      if (scrollViewportRef.current) {
-        scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
-      }
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [chatQuery.data, chatQuery.fetchStatus, currentPrompt, updateMessages]);
 
@@ -211,7 +208,7 @@ function StreamedQueryScreen() {
   };
 
   return (
-    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col gap-4 p-4">
+    <div className="container mx-auto max-w-4xl space-y-4 p-4 pb-8">
       {/* Header */}
       <div className="bg-card flex items-center justify-between rounded-xl border p-6 shadow-sm">
         <div className="space-y-1">
@@ -284,10 +281,10 @@ function StreamedQueryScreen() {
       </Card>
 
       {/* Chat Area */}
-      <Card className="border-muted/60 flex flex-1 flex-col overflow-hidden shadow-md">
-        <ScrollArea className="flex-1 p-4" viewportRef={scrollViewportRef}>
+      <Card className="border-muted/60 shadow-md">
+        <div className="p-4">
           {messages.length === 0 && (
-            <div className="flex h-full flex-col items-center justify-center space-y-6 p-8 text-center opacity-60">
+            <div className="flex min-h-[24rem] flex-col items-center justify-center space-y-6 p-8 text-center opacity-60">
               <div className="bg-muted/50 rounded-full p-4">
                 <Monitor className="text-muted-foreground h-8 w-8" />
               </div>
@@ -365,34 +362,43 @@ function StreamedQueryScreen() {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="bg-muted/20 border-t p-4 backdrop-blur-sm">
-          <div className="relative flex gap-2">
-            <Input
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder={serverStatus === "online" ? "Type your prompt here..." : "Server unavailable"}
-              disabled={chatQuery.fetchStatus === "fetching" || serverStatus !== "online"}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              className="bg-background pr-12 shadow-sm"
-            />
-            <div className="absolute top-1 right-1">
-              {userInput.trim() ? (
-                <Button
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handleSendMessage}
-                  disabled={chatQuery.fetchStatus === "fetching"}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetChat} title="Reset Chat">
-                  <RefreshCw className="text-muted-foreground h-4 w-4" />
-                </Button>
-              )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder={serverStatus === "online" ? "Type your prompt here..." : "Server unavailable"}
+                disabled={chatQuery.fetchStatus === "fetching" || serverStatus !== "online"}
+                onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                className="bg-background h-10 pr-14 shadow-sm"
+              />
+              <div className="absolute top-1/2 right-1.5 -translate-y-1/2">
+                {userInput.trim() ? (
+                  <Button
+                    size="icon"
+                    className="h-7 w-7 shadow-none"
+                    onClick={handleSendMessage}
+                    disabled={chatQuery.fetchStatus === "fetching"}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shadow-none"
+                    onClick={resetChat}
+                    title="Reset Chat"
+                  >
+                    <RefreshCw className="text-muted-foreground h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           <div className="text-muted-foreground mt-3 flex items-center justify-between text-[10px] font-medium tracking-widest uppercase">

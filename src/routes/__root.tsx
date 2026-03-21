@@ -23,8 +23,8 @@ function RootComponent() {
     <>
       <NavBar />
       <Outlet />
-      <ReactQueryDevtools initialIsOpen={false} />
-      <TanStackRouterDevtools />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      {/* <TanStackRouterDevtools /> */}
     </>
   );
 }
