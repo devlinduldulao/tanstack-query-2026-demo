@@ -26,17 +26,17 @@ export function NavBar() {
 
   return (
     <nav className="brutal-border-thick brutal-shadow-lg bg-background sticky top-0 z-50 w-full border-b-0 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center px-4">
+      <div className="container mx-auto flex h-16 min-w-0 items-center px-4">
         {/* Desktop Menu */}
-        <div className="mr-4 hidden md:flex">
+        <div className="mr-4 hidden min-w-0 flex-1 items-center md:flex">
           <Link
             to="/"
-            className="font-display text-primary mr-8 flex items-center space-x-2 text-2xl font-black tracking-tight uppercase transition-transform hover:scale-105"
+            className="font-display text-primary mr-4 flex shrink-0 items-center space-x-2 text-2xl font-black tracking-tight uppercase transition-transform hover:scale-105 lg:mr-8"
           >
             <span className="brutal-shadow bg-primary text-primary-foreground rounded px-3 py-1">2026</span>
             <span>React Miami</span>
           </Link>
-          <nav className="flex items-center gap-2 text-sm font-bold tracking-wide uppercase lg:gap-3">
+          <nav className="no-scrollbar flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 text-sm font-bold tracking-wide whitespace-nowrap uppercase lg:gap-3">
             {items
               .filter((i) => i.to !== "/")
               .map((item) => (
@@ -52,7 +52,7 @@ export function NavBar() {
         </div>
 
         {/* Theme Switcher */}
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto flex shrink-0 items-center">
           <div className="brutal-border rounded">
             <ThemeSwitcher />
           </div>

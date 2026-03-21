@@ -23,11 +23,9 @@ export function ThemeSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Icon className="h-4 w-4" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-9 w-9" />}>
+        <Icon className="h-4 w-4" />
+        <span className="sr-only">Toggle theme</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {themes.map((t) => {
