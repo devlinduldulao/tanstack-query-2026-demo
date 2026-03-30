@@ -104,7 +104,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export const Route = createFileRoute("/app/$applicationId/")({
   loader: ({ context: { queryClient }, params: { applicationId } }) => {
     void queryClient.ensureQueryData(applicationGetOptions({ path: { applicationId } }));
-    return { crumb: "application" };
   },
   pendingComponent: ApplicationSkeleton,
   component: RouteComponent,
