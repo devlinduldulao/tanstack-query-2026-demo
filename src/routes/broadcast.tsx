@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo } from "react";
-import { toast } from "sonner";
+import { useCallback, useMemo } from "react";
 import { Globe, Laptop, RefreshCw, Share2, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,7 @@ import { cn } from "@/lib/utils";
  *
  * CORE CONCEPTS:
  * 1. Single Source of Truth: The Query Client holds the state.
- * 2. Event-Driven Updates: Browser events trigger updates in other tabs.
+ * 2. BroadcastChannel Sync: query cache updates are broadcast to other tabs.
  * 3. Optimistic UI: The local tab updates instantly, while others sync milliseconds later.
  */
 
@@ -27,19 +26,28 @@ export const Route = createFileRoute("/broadcast")({
   component: BroadcastScreen,
 });
 
-// --- Hook Implementation (Simulating the Broadcast Client behaviors for the demo) ---
+// --- Hook Implementation (Using broadcastQueryClient for cross-tab sync) ---
 //
 // CONTEXT FOR DEVELOPERS:
-// In a production application using TanStack Query, cross-tab synchronization is typically handled
-// by the `@tanstack/query-broadcast-client-experimental` package which uses the BroadcastChannel API.
+// Cross-tab synchronization is handled by `@tanstack/query-broadcast-client-experimental`
+// which is set up in main.tsx. It uses the BroadcastChannel API to automatically sync
+// any query cache changes to all open tabs with the same origin.
 //
-// For this standalone demo, we implement a custom hook `useSharedState` that simulates this behavior
-// using the `localStorage` API. The localStorage 'storage' event is unique because it ONLY fires
-// in *other* tabs/windows, not the one that triggered the change, making it perfect for this simulation.
+// The `useSharedState` hook below uses the query cache as state (via useQuery + setQueryData).
+// Since broadcastQueryClient is active, calling setQueryData in one tab automatically
+// pushes the update to every other open tab — no manual event wiring needed.
+//
+// This route intentionally avoids localStorage so it remains a pure demo of
+// TanStack Query's BroadcastChannel-based synchronization.
 
 /**
  * A custom hook that creates a synchronized state across browser tabs.
- * acts like useState() but synchronizes across windows.
+ * Acts like useState() but synchronizes across windows via broadcastQueryClient.
+ *
+ * HOW IT WORKS:
+ * - Uses useQuery as a "state container" with caching and devtools inspection.
+ * - Calls setQueryData to update state. broadcastQueryClient (set up in main.tsx)
+ *   automatically pushes that cache change to all other open tabs.
  */
 function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   const queryClient = useQueryClient();
@@ -50,66 +58,22 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   // and a single source of truth for this tab.
   const { data } = useQuery({
     queryKey,
-    queryFn: () => {
-      // HYDRATION: On mount, check if there's already data in storage
-      // (in case the user refreshes the page)
-      const stored = localStorage.getItem(`tq-sync-${key}`);
-      if (stored) {
-        try {
-          return JSON.parse(stored).data;
-        } catch {
-          return initialData;
-        }
-      }
-      return initialData;
-    },
+    queryFn: () => initialData,
     initialData: initialData,
     staleTime: Infinity, // Data considered fresh forever (until we manually update it)
     gcTime: Infinity, // Keep in garbage collection forever
-    refetchOnWindowFocus: false, // Disable default refetching; we rely on events
+    refetchOnWindowFocus: false, // Disable default refetching; broadcastQueryClient handles sync
   });
 
-  // 2. THE RECEIVER (Listening for external updates)
-  // This useEffect listens for the 'storage' event, which fires when
-  // localStorage is modified in ANOTHER tab.
-  useEffect(() => {
-    const handleStorage = (event: StorageEvent) => {
-      // Only react to changes for our specific key
-      if (event.key === `tq-sync-${key}` && event.newValue) {
-        try {
-          const payload = JSON.parse(event.newValue);
-          // Update the Query Cache with the new data from the other tab.
-          // This will automatically trigger a re-render of this component.
-          queryClient.setQueryData(queryKey, payload.data);
-          toast("State synced from another tab!");
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, [key, queryClient, queryKey]);
-
-  // 3. THE BROADCASTER (Sending updates)
+  // 2. THE UPDATER
+  // Calling setQueryData updates the local cache AND broadcastQueryClient
+  // automatically broadcasts the change to every other open tab.
   const setState = useCallback(
     (newData: T) => {
-      // Step A: Optimistic Update
-      // Update the local query cache immediately so the UI feels instant in THIS tab.
+      // Update the query cache — broadcastQueryClient pushes this to other tabs.
       queryClient.setQueryData(queryKey, newData);
-
-      // Step B: Broadcast
-      // Write to localStorage. This fires the 'storage' event in ALL OTHER open tabs,
-      // triggering their listeners (defined in step 2).
-      localStorage.setItem(
-        `tq-sync-${key}`,
-        JSON.stringify({
-          timestamp: Date.now(),
-          data: newData,
-        }),
-      );
     },
-    [queryClient, queryKey, key],
+    [queryClient, queryKey],
   );
 
   return [data as T, setState];
@@ -136,10 +100,10 @@ function BroadcastScreen() {
       <div className="space-y-2">
         <h1 className="flex items-center gap-3 text-4xl font-extrabold tracking-tight">
           <Share2 className="h-8 w-8 text-indigo-500" />
-          Cross-Tab Broadcast
+          broadcastQueryClient Demo
         </h1>
         <p className="text-muted-foreground text-xl">
-          Synchronize client state across tabs instantly without a server.
+          Synchronize TanStack Query cache state across same-origin tabs with BroadcastChannel.
         </p>
       </div>
 
@@ -167,6 +131,9 @@ function BroadcastScreen() {
                     New Tab
                   </a>
                   . Change the values below and watch them sync instantly.
+                </p>
+                <p className="mt-2 text-sm">
+                  This only works between tabs on the same origin because BroadcastChannel is scoped to the current app origin.
                 </p>
               </div>
             </div>
@@ -245,6 +212,10 @@ function BroadcastScreen() {
               <code className="bg-muted text-foreground rounded px-1 py-0.5">Broadcast Channel API</code> to synchronize
               the TanStack Query cache between browser tabs with the same origin.
             </p>
+            <p>
+              This page is intentionally a pure TanStack Query demo: it does not use localStorage or any other
+              persistence layer, so refreshing the page resets the state.
+            </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>One tab updates the query cache.</li>
               <li>The change is broadcasted via a named channel.</li>
@@ -264,19 +235,30 @@ function BroadcastScreen() {
           </CardHeader>
           <CardContent>
             <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-xs text-slate-50">
-              {`import { broadcastQueryClient } 
+              {`// main.tsx — runs once at app startup
+import { broadcastQueryClient }
   from "@tanstack/query-broadcast-client-experimental";
 
 const queryClient = new QueryClient();
 
 broadcastQueryClient({
   queryClient,
-  broadcastChannel: "my-app-channel",
-});`}
+  broadcastChannel: "tanstack-query-demo",
+});
+
+// Any component — setQueryData syncs to all tabs
+queryClient.setQueryData(["shared", "text"], "Hi!");`}
             </pre>
             <p className="text-muted-foreground mt-4 text-xs">
-              This demo uses a <code className="bg-muted rounded px-1">localStorage</code> event fallback pattern to
-              simulate this behavior since the experimental package isn't installed in this environment.
+              This demo uses the real <code className="bg-muted rounded px-1">broadcastQueryClient</code> utility
+              configured in <code className="bg-muted rounded px-1">main.tsx</code>. Any{" "}
+              <code className="bg-muted rounded px-1">setQueryData</code> call is automatically broadcast to all open
+              tabs via the BroadcastChannel API. Refreshing the page resets the demo because no
+              persistence layer is used.
+            </p>
+            <p className="text-muted-foreground mt-2 text-xs">
+              The package is experimental, so production apps should pin it to a patch version to avoid unexpected
+              breaking changes.
             </p>
           </CardContent>
         </Card>

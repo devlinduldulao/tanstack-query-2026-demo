@@ -1,9 +1,12 @@
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { broadcastQueryClient } from "@tanstack/query-broadcast-client-experimental";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { routeTree } from "./route-tree.gen";
+
+const BROADCAST_CHANNEL = "tanstack-query-demo";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +23,13 @@ const queryClient = new QueryClient({
       },
     },
   },
+});
+
+// Set up cross-tab query cache sync once at app startup.
+// This must live next to the shared QueryClient, not inside a route component.
+broadcastQueryClient({
+  queryClient,
+  broadcastChannel: BROADCAST_CHANNEL,
 });
 
 const router = createRouter({

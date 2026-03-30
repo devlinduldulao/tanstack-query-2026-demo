@@ -37,13 +37,20 @@ type ChatMessage = {
   type: "user" | "assistant";
   content: string | string[];
   timestamp: Date;
+  prompt?: string;
   streaming?: boolean;
+};
+
+type ActiveRequest = {
+  messageId: string;
+  prompt: string;
+  requestToken: string;
 };
 
 function StreamedQueryScreen() {
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [activeRequest, setActiveRequest] = useState<ActiveRequest | null>(null);
   const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
   const [refetchMode, setRefetchMode] = useState<"reset" | "append" | "replace">("reset");
   const [connectionStatus, setConnectionStatus] = useState<string>("idle");
@@ -93,15 +100,16 @@ function StreamedQueryScreen() {
   }, []);
 
   const chatQueryOptions = queryOptions({
-    queryKey: ["chat-stream", currentPrompt],
+    queryKey: ["chat-stream", activeRequest?.requestToken ?? "idle", activeRequest?.prompt ?? ""] as const,
     queryFn: streamedQuery({
       streamFn: async function* (context) {
-        if (!currentPrompt) return; // Should not happen due to enabled check
+        const [, , prompt] = context.queryKey;
+        if (!prompt) return;
 
         const response = await fetch(`${SERVER_URL}/stream-chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: currentPrompt }),
+          body: JSON.stringify({ prompt }),
           signal: context.signal,
         });
 
@@ -132,6 +140,17 @@ function StreamedQueryScreen() {
                 }
               }
             }
+
+            if (buffer.trim()) {
+              try {
+                const parsed = JSON.parse(buffer.trim());
+                if (parsed.chunk) {
+                  yield parsed.chunk;
+                }
+              } catch (e) {
+                console.warn("Trailing JSON parse error:", e);
+              }
+            }
           }
         } finally {
           reader.releaseLock();
@@ -139,7 +158,7 @@ function StreamedQueryScreen() {
       },
       refetchMode: refetchMode,
     }),
-    enabled: currentPrompt.length > 0 && serverStatus === "online",
+    enabled: Boolean(activeRequest?.prompt) && serverStatus === "online",
     staleTime: Infinity,
     retry: false,
     gcTime: 0,
@@ -147,11 +166,10 @@ function StreamedQueryScreen() {
 
   const chatQuery = useQuery(chatQueryOptions);
 
-  const updateMessages = useCallback((data: string[], prompt: string, isFetching: boolean) => {
+  const updateMessages = useCallback((data: string[], request: ActiveRequest, isFetching: boolean) => {
     setConnectionStatus(`Received ${data.length} chunks`);
     setMessages((prev) => {
-      const messageId = `msg-${prompt}`;
-      const existingMessageIndex = prev.findIndex((m) => m.id === messageId);
+      const existingMessageIndex = prev.findIndex((m) => m.id === request.messageId);
 
       if (existingMessageIndex >= 0) {
         const newMessages = [...prev];
@@ -165,10 +183,11 @@ function StreamedQueryScreen() {
         return [
           ...prev,
           {
-            id: messageId,
+            id: request.messageId,
             type: "assistant" as const,
             content: data,
             timestamp: new Date(),
+            prompt: request.prompt,
             streaming: isFetching,
           },
         ];
@@ -177,8 +196,8 @@ function StreamedQueryScreen() {
   }, []);
 
   useEffect(() => {
-    if (chatQuery.data && currentPrompt) {
-      updateMessages(chatQuery.data, currentPrompt, chatQuery.fetchStatus === "fetching");
+    if (chatQuery.data && activeRequest) {
+      updateMessages(chatQuery.data, activeRequest, chatQuery.fetchStatus === "fetching");
 
       if (shouldAutoScrollRef.current) {
         messagesEndRef.current?.scrollIntoView({
@@ -187,7 +206,7 @@ function StreamedQueryScreen() {
         });
       }
     }
-  }, [chatQuery.data, chatQuery.fetchStatus, currentPrompt, updateMessages]);
+  }, [activeRequest, chatQuery.data, chatQuery.fetchStatus, updateMessages]);
 
   const connectionStatusText = useMemo(() => {
     if (chatQuery.status === "pending") return "Connecting...";
@@ -207,14 +226,20 @@ function StreamedQueryScreen() {
       setStreamWasStopped(false);
       shouldAutoScrollRef.current = true;
 
+      const prompt = userInput.trim();
+      const messageId = crypto.randomUUID();
+      const requestToken = crypto.randomUUID();
+
       const userMessage: ChatMessage = {
-        id: `user-${Date.now()}`,
+        id: `user-${messageId}`,
         type: "user",
-        content: userInput,
+        content: prompt,
         timestamp: new Date(),
+        prompt,
       };
+
       setMessages((prev) => [...prev, userMessage]);
-      setCurrentPrompt(userInput);
+      setActiveRequest({ messageId, prompt, requestToken });
       setUserInput("");
     }
   };
@@ -223,12 +248,14 @@ function StreamedQueryScreen() {
     setUserInput(prompt);
   };
 
-  const handleRefetch = () => {
-    if (currentPrompt) {
-      setStreamWasStopped(false);
-      shouldAutoScrollRef.current = true;
-      chatQuery.refetch();
-    }
+  const handleRefetch = (messageId: string, prompt: string) => {
+    setStreamWasStopped(false);
+    shouldAutoScrollRef.current = true;
+    setActiveRequest({
+      messageId,
+      prompt,
+      requestToken: crypto.randomUUID(),
+    });
   };
 
   const handleStopStreaming = async () => {
@@ -240,7 +267,7 @@ function StreamedQueryScreen() {
     setStreamWasStopped(true);
     setMessages((prev) =>
       prev.map((message) =>
-        message.id === `msg-${currentPrompt}`
+        message.id === activeRequest?.messageId
           ? {
             ...message,
             streaming: false,
@@ -252,7 +279,7 @@ function StreamedQueryScreen() {
 
   const resetChat = () => {
     setMessages([]);
-    setCurrentPrompt("");
+    setActiveRequest(null);
     setUserInput("");
     setStreamWasStopped(false);
     queryClient.removeQueries({ queryKey: ["chat-stream"] });
@@ -418,7 +445,7 @@ function StreamedQueryScreen() {
                         variant="ghost"
                         size="icon"
                         className="hover:bg-background h-6 w-6"
-                        onClick={handleRefetch}
+                        onClick={() => handleRefetch(message.id, message.prompt ?? "")}
                       >
                         <RefreshCw className="h-3 w-3" />
                       </Button>
