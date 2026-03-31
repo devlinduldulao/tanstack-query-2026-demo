@@ -26,8 +26,11 @@ export const Route = createFileRoute("/streamed-query")({
  * - `TextDecoder` incrementally decodes byte chunks into text without waiting for the
  *   full response.
  *
- * TanStack Query is handling cache lifecycle, refetch semantics, and React integration.
- * The browser is still doing the low-level streaming work.
+ * IMPLEMENTATION BOUNDARY:
+ * - `streamFn` is our implementation of how chunks are read and yielded.
+ * - `experimental_streamedQuery` is TanStack Query's orchestration layer around that
+ *   implementation: it manages cache lifecycle, status transitions, and React integration.
+ * - The browser is still doing the low-level streaming work through the Streams API.
  */
 
 // Server configuration
@@ -119,6 +122,8 @@ function StreamedQueryScreen() {
   const chatQueryOptions = queryOptions({
     queryKey: ["chat-stream", activeRequest?.requestToken ?? "idle", activeRequest?.prompt ?? ""] as const,
     queryFn: streamedQuery({
+      // `streamFn` is the application-specific streaming implementation.
+      // TanStack wraps this generator and turns it into query state and cache updates.
       streamFn: async function* (context) {
         const [, , prompt] = context.queryKey;
         if (!prompt) return;
@@ -412,6 +417,9 @@ function StreamedQueryScreen() {
                 <h3 className="text-lg font-semibold">Ready to Stream</h3>
                 <p className="text-muted-foreground text-sm">
                   Responses arrive progressively from the server, so you can read while the answer is still being generated.
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  This demo implements the stream reader inside <span className="font-mono">streamFn</span>, while TanStack Query manages the query state around it.
                 </p>
               </div>
               <div className="grid w-full max-w-lg grid-cols-1 gap-3 md:grid-cols-2">
