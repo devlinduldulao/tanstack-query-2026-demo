@@ -25,8 +25,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Set up cross-tab query cache sync once at app startup.
-// This must live next to the shared QueryClient, not inside a route component.
+// This is the actual BroadcastChannel wiring for the app.
+// `broadcastQueryClient` attaches cross-tab cache synchronization to the shared QueryClient,
+// so it must be initialized once at app startup rather than inside a route component.
 broadcastQueryClient({
   queryClient,
   broadcastChannel: BROADCAST_CHANNEL,
@@ -59,7 +60,7 @@ const router = createRouter({
 });
 
 declare module "@tanstack/react-router" {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+
   interface Register {
     router: typeof router; // merge your router's exact types with exported hooks, components, and utilities.
   }
