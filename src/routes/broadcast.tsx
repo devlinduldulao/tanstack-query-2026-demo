@@ -13,49 +13,32 @@ import { cn } from "@/lib/utils";
 /**
  * BROADCAST & SHARE PAGE
  * ----------------------------------------------------------------------------------
- * This route demonstrates how to synchronize application state across multiple browser
- * tabs or windows without needing a backend subscription (like WebSockets).
+ * This route demonstrates TanStack Query cache synchronization across same-origin tabs.
  *
- * CORE CONCEPTS:
- * 1. Single Source of Truth: The Query Client holds the state.
- * 2. BroadcastChannel Sync: query cache updates are broadcast to other tabs.
- * 3. Optimistic UI: The local tab updates instantly, while others sync milliseconds later.
+ * MDN RELATIONSHIP:
+ * - The browser primitive is the Broadcast Channel API described on MDN.
+ * - This route does not call `new BroadcastChannel()` directly.
+ * - TanStack's `broadcastQueryClient`, configured once in main.tsx, owns the low-level
+ *   channel wiring so this file can focus on query-cache state.
  */
 
 export const Route = createFileRoute("/broadcast")({
   component: BroadcastScreen,
 });
 
-// --- Hook Implementation (Using broadcastQueryClient for cross-tab sync) ---
-//
-// CONTEXT FOR DEVELOPERS:
-// Cross-tab synchronization is handled by `@tanstack/query-broadcast-client-experimental`
-// which is set up in main.tsx. It uses the BroadcastChannel API to automatically sync
-// any query cache changes to all open tabs with the same origin.
-//
-// The `useSharedState` hook below uses the query cache as state (via useQuery + setQueryData).
-// Since broadcastQueryClient is active, calling setQueryData in one tab automatically
-// pushes the update to every other open tab — no manual event wiring needed.
-//
-// This route intentionally avoids localStorage so it remains a pure demo of
-// TanStack Query's BroadcastChannel-based synchronization.
+// Cross-tab synchronization is provided by `broadcastQueryClient` in main.tsx.
+// This hook uses the query cache as shared state, and TanStack broadcasts cache updates
+// across same-origin tabs through the browser's BroadcastChannel API.
 
 /**
  * A custom hook that creates a synchronized state across browser tabs.
- * Acts like useState() but synchronizes across windows via broadcastQueryClient.
- *
- * HOW IT WORKS:
- * - Uses useQuery as a "state container" with caching and devtools inspection.
- * - Calls setQueryData to update state. broadcastQueryClient (set up in main.tsx)
- *   automatically pushes that cache change to all other open tabs.
+ * It behaves like useState(), but stores the value in the query cache so cache updates
+ * can be broadcast to other tabs by `broadcastQueryClient`.
  */
 function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   const queryClient = useQueryClient();
   const queryKey = useMemo(() => ["shared", key] as const, [key]);
 
-  // 1. STATE HOLDER (The Query)
-  // We use useQuery to hold the state. This gives us caching, devtools inspection,
-  // and a single source of truth for this tab.
   const { data } = useQuery({
     queryKey,
     queryFn: () => initialData,
@@ -65,12 +48,8 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
     refetchOnWindowFocus: false, // Disable default refetching; broadcastQueryClient handles sync
   });
 
-  // 2. THE UPDATER
-  // Calling setQueryData updates the local cache AND broadcastQueryClient
-  // automatically broadcasts the change to every other open tab.
   const setState = useCallback(
     (newData: T) => {
-      // Update the query cache — broadcastQueryClient pushes this to other tabs.
       queryClient.setQueryData(queryKey, newData);
     },
     [queryClient, queryKey],

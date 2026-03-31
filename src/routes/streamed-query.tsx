@@ -13,6 +13,23 @@ export const Route = createFileRoute("/streamed-query")({
   component: StreamedQueryScreen,
 });
 
+/**
+ * STREAMED QUERY PAGE
+ * ----------------------------------------------------------------------------------
+ * This route demonstrates TanStack Query's `experimental_streamedQuery`, but the stream
+ * consumption itself is built directly on the browser Streams API described on MDN.
+ *
+ * MDN RELATIONSHIP:
+ * - `fetch()` exposes `response.body` as a `ReadableStream`.
+ * - `response.body.getReader()` creates a reader for progressive chunk consumption.
+ * - `reader.read()` pulls chunks until the stream is complete.
+ * - `TextDecoder` incrementally decodes byte chunks into text without waiting for the
+ *   full response.
+ *
+ * TanStack Query is handling cache lifecycle, refetch semantics, and React integration.
+ * The browser is still doing the low-level streaming work.
+ */
+
 // Server configuration
 const SERVER_URL = "http://localhost:3001";
 
@@ -115,15 +132,20 @@ function StreamedQueryScreen() {
 
         if (!response.body) throw new Error("No response body");
 
+        // This is the direct Streams API boundary:
+        // - `response.body` is a ReadableStream
+        // - `getReader()` gives us a reader for chunk-by-chunk consumption
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
 
         try {
           while (true) {
+            // Pull the next chunk from the stream until `done` becomes true.
             const { done, value } = await reader.read();
             if (done) break;
 
+            // Decode incrementally so partial UTF-8 characters survive across chunk boundaries.
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split("\n");
             buffer = lines.pop() || "";
