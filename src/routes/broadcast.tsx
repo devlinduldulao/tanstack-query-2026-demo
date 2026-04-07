@@ -84,7 +84,6 @@ function getCanvasStyles(theme: Theme) {
 function BroadcastScreen() {
   const [sharedText, setSharedText] = useSharedState<string>("demo-text", "Hello World");
   const { theme: sharedTheme, setTheme: setSharedTheme } = useThemeStore();
-  // const [lastSync] = useState(new Date());
 
   return (
     <div className="container mx-auto max-w-4xl space-y-8 p-4">
