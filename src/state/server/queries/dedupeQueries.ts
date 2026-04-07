@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import dedupeService from "@/services/dedupe";
+import postService from "@/services/post";
 
 export function useDedupeQuery() {
   return useQuery({
     queryKey: ["posts"], // Expo code used posts
-    queryFn: () => dedupeService.getPosts(),
+    queryFn: () => postService.getPosts(),
   });
 }

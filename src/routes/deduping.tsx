@@ -4,9 +4,9 @@ import SampleA from "@/components/sample-a";
 import SampleB from "@/components/sample-b";
 import { PulsingDot } from "@/components/pulsing-dot";
 import { useDedupeQuery } from "@/state/server/queries/dedupeQueries";
-import dedupeService from "@/services/dedupe";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Layers, Activity } from "lucide-react";
+import userService from "@/services/user";
 
 export const Route = createFileRoute("/deduping")({
   component: DedupingScreen,
@@ -17,7 +17,7 @@ function DedupingScreen() {
 
   useEffect(() => {
     // Intentionally trigger a fetch to show deduplication in network tab if observed closely
-    dedupeService.getUsers().then(() => console.log("Users fetched directly"));
+    userService.getUsers().then(() => console.log("Users fetched directly"));
   }, []);
 
   return (

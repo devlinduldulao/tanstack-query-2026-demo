@@ -1,5 +1,5 @@
-import type { Todo } from "@/models";
 import { api } from "@/lib/axios";
+import type { Todo } from "@/models";
 
 const endPoint = "todo-list";
 

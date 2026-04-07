@@ -1,5 +1,5 @@
-import type { Report } from "@/models";
 import { api } from "@/lib/axios";
+import type { Report } from "@/models";
 
 const endPoint = "reports";
 
