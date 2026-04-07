@@ -26,6 +26,8 @@ export const Route = createFileRoute("/broadcast")({
   component: BroadcastScreen,
 });
 
+type SharedTheme = "light" | "dark" | "blue";
+
 // Cross-tab synchronization is provided by `broadcastQueryClient` in main.tsx.
 // This hook uses the query cache as shared state, and TanStack broadcasts cache updates
 // across same-origin tabs through the browser's BroadcastChannel API.
@@ -58,27 +60,38 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   return [data as T, setState];
 }
 
+function getThemeStyles(theme: SharedTheme) {
+  switch (theme) {
+    case "dark":
+      return "border-slate-700 bg-slate-950 text-slate-50";
+    case "blue":
+      return "border-blue-800 bg-blue-950 text-blue-50";
+    default:
+      return "border-border bg-card text-card-foreground";
+  }
+}
+
+function getCanvasStyles(theme: SharedTheme) {
+  switch (theme) {
+    case "dark":
+      return "border-slate-600 bg-slate-900/70 text-slate-100";
+    case "blue":
+      return "border-blue-300 bg-blue-50/80 text-blue-950 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-50 dim:border-blue-700 dim:bg-blue-900/25 dim:text-blue-50";
+    default:
+      return "border-border/80 bg-background/80 text-foreground";
+  }
+}
+
 function BroadcastScreen() {
   const [sharedText, setSharedText] = useSharedState<string>("demo-text", "Hello World");
-  const [sharedTheme, setSharedTheme] = useSharedState<"light" | "dark" | "blue">("demo-theme", "light");
+  const [sharedTheme, setSharedTheme] = useSharedState<SharedTheme>("demo-theme", "light");
   // const [lastSync] = useState(new Date());
-
-  const getThemeStyles = (theme: string) => {
-    switch (theme) {
-      case "dark":
-        return "bg-slate-950 text-slate-50 border-slate-800";
-      case "blue":
-        return "bg-blue-950 text-blue-50 border-blue-800";
-      default:
-        return "bg-white text-slate-900 border-slate-200";
-    }
-  };
 
   return (
     <div className="container mx-auto max-w-4xl space-y-8 p-4">
       <div className="space-y-2">
         <h1 className="flex items-center gap-3 text-4xl font-extrabold tracking-tight">
-          <Share2 className="h-8 w-8 text-indigo-500" />
+          <Share2 className="dim:text-indigo-300 h-8 w-8 text-indigo-500 dark:text-indigo-400" />
           broadcastQueryClient Demo
         </h1>
         <p className="text-muted-foreground text-xl">
@@ -88,41 +101,45 @@ function BroadcastScreen() {
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Interactive Demo Card */}
-        <Card className="overflow-hidden border-indigo-200 shadow-lg md:col-span-2">
-          <div className="flex items-center justify-between border-b bg-indigo-50/50 p-4">
-            <div className="flex items-center gap-2 font-semibold text-indigo-700">
+        <Card className="border-primary/25 overflow-hidden shadow-lg md:col-span-2">
+          <div className="bg-primary/10 border-border/60 flex items-center justify-between border-b p-4">
+            <div className="text-primary flex items-center gap-2 font-semibold">
               <Laptop className="h-5 w-5" />
               <span>Interactive Demo</span>
             </div>
-            <Badge variant="outline" className="animate-pulse border-indigo-200 bg-white text-indigo-700">
+            <Badge variant="outline" className="border-primary/30 bg-background text-primary animate-pulse">
               Live Sync Active
             </Badge>
           </div>
 
           <CardContent className="space-y-8 p-8">
-            <div className="flex items-start gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
+            <div className="dim:border-amber-800 dim:bg-amber-900/35 dim:text-amber-100 flex items-start gap-4 rounded-lg border border-amber-300/70 bg-amber-50/85 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
               <span className="text-2xl">💡</span>
               <div>
                 <p className="font-semibold">Try it out:</p>
                 <p className="text-sm">
                   Open this page in a{" "}
-                  <a href="/broadcast" target="_blank" className="font-bold text-amber-700 underline">
+                  <a
+                    href="/broadcast"
+                    target="_blank"
+                    className="dim:text-amber-200 font-bold text-amber-800 underline underline-offset-2 dark:text-amber-300"
+                  >
                     New Tab
                   </a>
                   . Change the values below and watch them sync instantly.
                 </p>
                 <p className="mt-2 text-sm">
-                  This only works between tabs on the same origin because BroadcastChannel is scoped to the current app origin.
+                  This only works between tabs on the same origin because BroadcastChannel is scoped to the current app
+                  origin.
                 </p>
               </div>
             </div>
 
             <div
-              className="grid gap-6 rounded-xl border-2 border-dashed p-6 transition-colors duration-500"
-              style={{
-                borderColor: sharedTheme === "blue" ? "#93c5fd" : sharedTheme === "dark" ? "#475569" : "#e2e8f0",
-                backgroundColor: sharedTheme === "blue" ? "#eff6ff" : sharedTheme === "dark" ? "#f8fafc" : "#ffffff", // Just subtle tint
-              }}
+              className={cn(
+                "grid gap-6 rounded-xl border-2 border-dashed p-6 transition-colors duration-500",
+                getCanvasStyles(sharedTheme),
+              )}
             >
               <div className="space-y-4">
                 <Label className="text-base">Shared Message</Label>
@@ -146,7 +163,7 @@ function BroadcastScreen() {
                 <Label className="text-base">Shared Theme Preference</Label>
                 <RadioGroup
                   value={sharedTheme}
-                  onValueChange={(value) => setSharedTheme(value as "light" | "dark" | "blue")}
+                  onValueChange={(value) => setSharedTheme(value as SharedTheme)}
                   className="flex gap-4"
                 >
                   <div className="flex items-center space-x-2">
@@ -170,7 +187,9 @@ function BroadcastScreen() {
                 </CardHeader>
                 <CardContent>
                   This component reflects the shared state. It will look identical in all open tabs.
-                  <div className="mt-4 rounded bg-black/10 p-4 font-mono text-2xl">{sharedText || "..."}</div>
+                  <div className="mt-4 rounded border border-current/10 bg-black/10 p-4 font-mono text-2xl">
+                    {sharedText || "..."}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -181,7 +200,7 @@ function BroadcastScreen() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-green-600" />
+              <Globe className="dim:text-green-300 h-5 w-5 text-green-600 dark:text-green-400" />
               How It Works
             </CardTitle>
           </CardHeader>
@@ -208,7 +227,7 @@ function BroadcastScreen() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-600" />
+              <Zap className="dim:text-yellow-300 h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               Production Setup
             </CardTitle>
           </CardHeader>
@@ -232,8 +251,8 @@ queryClient.setQueryData(["shared", "text"], "Hi!");`}
               This demo uses the real <code className="bg-muted rounded px-1">broadcastQueryClient</code> utility
               configured in <code className="bg-muted rounded px-1">main.tsx</code>. Any{" "}
               <code className="bg-muted rounded px-1">setQueryData</code> call is automatically broadcast to all open
-              tabs via the BroadcastChannel API. Refreshing the page resets the demo because no
-              persistence layer is used.
+              tabs via the BroadcastChannel API. Refreshing the page resets the demo because no persistence layer is
+              used.
             </p>
             <p className="text-muted-foreground mt-2 text-xs">
               The package is experimental, so production apps should pin it to a patch version to avoid unexpected
