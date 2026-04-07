@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import { useThemeStore, type Theme } from "@/state/client/themeStore";
 import { cn } from "@/lib/utils";
 // ... imports
 
@@ -25,8 +26,6 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/broadcast")({
   component: BroadcastScreen,
 });
-
-type SharedTheme = "light" | "dark" | "blue";
 
 // Cross-tab synchronization is provided by `broadcastQueryClient` in main.tsx.
 // This hook uses the query cache as shared state, and TanStack broadcasts cache updates
@@ -60,23 +59,23 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   return [data as T, setState];
 }
 
-function getThemeStyles(theme: SharedTheme) {
+function getThemeStyles(theme: Theme) {
   switch (theme) {
     case "dark":
       return "border-slate-700 bg-slate-950 text-slate-50";
-    case "blue":
-      return "border-blue-800 bg-blue-950 text-blue-50";
+    case "dim":
+      return "border-slate-600 bg-slate-800 text-slate-100";
     default:
       return "border-border bg-card text-card-foreground";
   }
 }
 
-function getCanvasStyles(theme: SharedTheme) {
+function getCanvasStyles(theme: Theme) {
   switch (theme) {
     case "dark":
       return "border-slate-600 bg-slate-900/70 text-slate-100";
-    case "blue":
-      return "border-blue-300 bg-blue-50/80 text-blue-950 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-50 dim:border-blue-700 dim:bg-blue-900/25 dim:text-blue-50";
+    case "dim":
+      return "border-slate-500 bg-slate-800/60 text-slate-100";
     default:
       return "border-border/80 bg-background/80 text-foreground";
   }
@@ -84,7 +83,7 @@ function getCanvasStyles(theme: SharedTheme) {
 
 function BroadcastScreen() {
   const [sharedText, setSharedText] = useSharedState<string>("demo-text", "Hello World");
-  const [sharedTheme, setSharedTheme] = useSharedState<SharedTheme>("demo-theme", "light");
+  const { theme: sharedTheme, setTheme: setSharedTheme } = useThemeStore();
   // const [lastSync] = useState(new Date());
 
   return (
@@ -160,10 +159,10 @@ function BroadcastScreen() {
               </div>
 
               <div className="space-y-4">
-                <Label className="text-base">Shared Theme Preference</Label>
+                <Label className="text-base">App Theme Preference</Label>
                 <RadioGroup
                   value={sharedTheme}
-                  onValueChange={(value) => setSharedTheme(value as SharedTheme)}
+                  onValueChange={(value) => setSharedTheme(value as Theme)}
                   className="flex gap-4"
                 >
                   <div className="flex items-center space-x-2">
@@ -175,8 +174,8 @@ function BroadcastScreen() {
                     <Label htmlFor="dark">Dark Mode</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="blue" id="blue" />
-                    <Label htmlFor="blue">Ocean Mode</Label>
+                    <RadioGroupItem value="dim" id="dim" />
+                    <Label htmlFor="dim">Dim Mode</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -211,8 +210,9 @@ function BroadcastScreen() {
               the TanStack Query cache between browser tabs with the same origin.
             </p>
             <p>
-              This page is intentionally a pure TanStack Query demo: it does not use localStorage or any other
-              persistence layer, so refreshing the page resets the state.
+              The shared message on this page is intentionally a pure TanStack Query demo, so refreshing resets that
+              field. The theme control is different: it is wired to the app-wide shared theme, so changing it here also
+              updates the header theme switcher and any other open tab.
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>One tab updates the query cache.</li>
