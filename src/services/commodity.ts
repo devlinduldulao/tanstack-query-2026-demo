@@ -1,5 +1,5 @@
-import type { CommodityPaginate } from "@/models";
 import { api } from "@/lib/axios";
+import type { CommodityPaginate } from "@/models";
 
 const endPoint = "commodities";
 
