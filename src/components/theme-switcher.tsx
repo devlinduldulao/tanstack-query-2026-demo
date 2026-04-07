@@ -9,8 +9,7 @@ import {
 import { useThemeStore } from "@/state/client/themeStore";
 
 export function ThemeSwitcher() {
-  const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const { theme, setTheme } = useThemeStore();
 
   const themes = [
     { value: "light" as const, label: "Light", icon: Sun },

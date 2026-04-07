@@ -14,7 +14,7 @@ export const Route = createRootRouteWithContext<RouterContextType>()({
 
 // enable the devtools if you are debugging tanstack routing and query issues
 function RootComponent() {
-  // Apply theme from store to document root
+  // Apply the shared TanStack Query theme to the document root.
   useApplyTheme();
 
   return (
