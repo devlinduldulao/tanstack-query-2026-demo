@@ -3,7 +3,7 @@ import postService from "@/services/post";
 
 export function useDedupeQuery() {
   return useQuery({
-    queryKey: ["posts"], // Expo code used posts
+    queryKey: ["posts"],
     queryFn: () => postService.getPosts(),
   });
 }
