@@ -18,7 +18,10 @@ function PaginationScreen() {
 
   const { data, isRefetching, isFetching, isError, error } = useQuery({
     queryKey: ["commodities", page, pageSize],
-    queryFn: () => commodityService.getCommodities(page, pageSize),
+    queryFn: () => {
+      // page is the current page number, pageSize is the number of items per page
+      return commodityService.getCommodities(page, pageSize);
+    },
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 1, // 1 minute
   });

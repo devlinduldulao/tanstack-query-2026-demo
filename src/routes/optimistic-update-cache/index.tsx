@@ -25,8 +25,8 @@ function MoviesScreen() {
   const deleteMovieMutation = useMutation({
     mutationKey: ["movies", "delete"],
     mutationFn: (id: string) => movieService.deleteMovie(id),
-    onMutate: async (id: string) => {
-      await queryClient.cancelQueries({ queryKey: ["movies"] });
+    onMutate: (id: string) => {
+      queryClient.cancelQueries({ queryKey: ["movies"] });
       const previousMovies = queryClient.getQueryData<Movie[]>(["movies"]);
       queryClient.setQueryData<Movie[]>(["movies"], (old) => old?.filter((m) => String(m.id) !== String(id)) ?? []);
       queryClient.removeQueries({ queryKey: ["movie", id] });

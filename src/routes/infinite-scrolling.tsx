@@ -18,11 +18,15 @@ function InfiniteScrollingScreen() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, error } = useInfiniteQuery({
     queryKey: ["commodities-infinite"],
-    queryFn: async ({ pageParam }) => {
-      return await commodityService.getCommodities(pageParam as number, ITEMS_PER_PAGE);
+    queryFn: ({ pageParam }) => {
+      // pageParam is the page number to fetch
+      return commodityService.getCommodities(pageParam as number, ITEMS_PER_PAGE);
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
+    getNextPageParam: (lastPage) => {
+      // lastPage.next is the next page number returned by the API
+      return lastPage.next ?? undefined
+    },
   });
 
   useEffect(() => {
