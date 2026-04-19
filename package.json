@@ -9,10 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsgo --noEmit",
     "llm": "node server/streaming-server.js",
-    "api": "json-server json-server/db.json --port=8080 --delay=3000",
-    "openapi-ts": "openapi-ts",
-    "update-swagger-pwsh": "Invoke-WebRequest -Uri \"https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json\" -OutFile \"swagger.json\"",
-    "update-swagger-bash": "curl -o swagger.json \"https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json\""
+    "api": "json-server json-server/db.json --port=8080 --delay=1000"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

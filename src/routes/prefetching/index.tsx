@@ -19,6 +19,8 @@ function ReportsScreen() {
   });
 
   const queryClient = useQueryClient();
+
+  // for the prefetch badge syncing
   useSyncExternalStore(
     (onStoreChange) =>
       queryClient.getQueryCache().subscribe((event) => {

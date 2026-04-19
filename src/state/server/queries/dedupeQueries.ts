@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import postService from "@/services/post";
 
-export function useDedupeQuery() {
+// for dedupe demo
+export function usePostsQuery() {
   return useQuery({
     queryKey: ["posts"],
     queryFn: () => postService.getPosts(),

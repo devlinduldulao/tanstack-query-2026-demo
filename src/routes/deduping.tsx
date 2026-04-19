@@ -1,24 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
 import SampleA from "@/components/sample-a";
 import SampleB from "@/components/sample-b";
 import { PulsingDot } from "@/components/pulsing-dot";
-import { useDedupeQuery } from "@/state/server/queries/dedupeQueries";
+import { usePostsQuery } from "@/state/server/queries/dedupeQueries";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Layers, Activity } from "lucide-react";
-import userService from "@/services/user";
+import { useUsers } from "@/hooks/use-users";
 
 export const Route = createFileRoute("/deduping")({
   component: DedupingScreen,
 });
 
 function DedupingScreen() {
-  const myQuery = useDedupeQuery();
 
-  useEffect(() => {
-    // Intentionally trigger a fetch to show deduplication in network tab if observed closely
-    userService.getUsers().then(() => console.log("Users fetched directly"));
-  }, []);
+  // tanstack query
+  const posts = usePostsQuery();
+
+  useUsers();
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 p-4">
@@ -35,7 +33,7 @@ function DedupingScreen() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              {myQuery.status === "pending" ? (
+              {posts.status === "pending" ? (
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <PulsingDot />
                   Fetching...
@@ -53,7 +51,7 @@ function DedupingScreen() {
           <p className="text-muted-foreground text-sm">
             Below are two independent components (<code className="bg-muted rounded px-1">SampleA</code> and{" "}
             <code className="bg-muted rounded px-1">SampleB</code>) that both hook into{" "}
-            <code className="bg-muted rounded px-1">useDedupeQuery</code>. Notice they load simultaneously from one
+            <code className="bg-muted rounded px-1">useQuery</code>. Notice they load simultaneously from one
             request.
           </p>
         </CardContent>

@@ -2,7 +2,6 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { broadcastQueryClient } from "@tanstack/query-broadcast-client-experimental";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { routeTree } from "./route-tree.gen";
 
@@ -82,8 +81,6 @@ const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <StrictMode>
       <App />
-    </StrictMode>,
   );
 }
