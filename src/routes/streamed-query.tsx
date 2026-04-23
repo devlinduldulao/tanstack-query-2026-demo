@@ -18,6 +18,8 @@ export const Route = createFileRoute("/streamed-query")({
  * ----------------------------------------------------------------------------------
  * This route demonstrates TanStack Query's `experimental_streamedQuery`, but the stream
  * consumption itself is built directly on the browser Streams API described on MDN.
+ * The demo server sends newline-delimited JSON objects, so the client also includes
+ * a small protocol parser on top of the raw byte stream.
  *
  * MDN RELATIONSHIP:
  * - `fetch()` exposes `response.body` as a `ReadableStream`.
@@ -123,7 +125,7 @@ function StreamedQueryScreen() {
     queryKey: ["chat-stream", activeRequest?.requestToken ?? "idle", activeRequest?.prompt ?? ""] as const,
     queryFn: streamedQuery({
       // `streamFn` is the application-specific streaming implementation.
-      // TanStack wraps this generator and turns it into query state and cache updates.
+      // TanStack wraps this generator and turns yielded chunks into query state updates.
       streamFn: async function* (context) {
         const [, , prompt] = context.queryKey;
         if (!prompt) return;
@@ -142,6 +144,9 @@ function StreamedQueryScreen() {
         // - `getReader()` gives us a reader for chunk-by-chunk consumption
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+
+        // The server sends newline-delimited JSON objects.
+        // `buffer` holds any incomplete trailing line until the next chunk arrives.
         let buffer = "";
 
         try {
@@ -152,6 +157,8 @@ function StreamedQueryScreen() {
 
             // Decode incrementally so partial UTF-8 characters survive across chunk boundaries.
             buffer += decoder.decode(value, { stream: true });
+
+            // Split complete lines for parsing and keep the final partial line in `buffer`.
             const lines = buffer.split("\n");
             buffer = lines.pop() || "";
 
