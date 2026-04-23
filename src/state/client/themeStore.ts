@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type Theme = "light" | "dark" | "dim";
@@ -55,6 +55,7 @@ function applyTheme(theme: Theme) {
  * 2. Query cache as the single client-side source of truth
  * 3. localStorage persistence for page refreshes
  * 4. Separated concerns (state vs. side effects)
+ * 5. No manual useCallback — React Compiler handles memoization automatically
  */
 export function useThemeStore(): ThemeState {
   const queryClient = useQueryClient();
@@ -68,19 +69,16 @@ export function useThemeStore(): ThemeState {
     refetchOnReconnect: false,
   });
 
-  const setTheme = useCallback(
-    (nextTheme: Theme) => {
-      queryClient.setQueryData(themeQueryKey, nextTheme);
-    },
-    [queryClient],
-  );
+  const setTheme = (nextTheme: Theme) => {
+    queryClient.setQueryData(themeQueryKey, nextTheme);
+  };
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     const currentIndex = themeOrder.indexOf(theme);
     const nextIndex = (currentIndex + 1) % themeOrder.length;
 
     queryClient.setQueryData(themeQueryKey, themeOrder[nextIndex]);
-  }, [queryClient, theme]);
+  };
 
   return {
     theme,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+
 import { Globe, Laptop, RefreshCw, Share2, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { useThemeStore, type Theme } from "@/state/client/themeStore";
 import { cn } from "@/lib/utils";
-// ... imports
 
 /**
  * BROADCAST & SHARE PAGE
@@ -38,7 +37,7 @@ export const Route = createFileRoute("/broadcast")({
  */
 function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
   const queryClient = useQueryClient();
-  const queryKey = useMemo(() => ["shared", key] as const, [key]);
+  const queryKey = ["shared", key] as const;
 
   const { data } = useQuery({
     queryKey,
@@ -49,12 +48,9 @@ function useSharedState<T>(key: string, initialData: T): [T, (val: T) => void] {
     refetchOnWindowFocus: false, // Disable default refetching; broadcastQueryClient handles sync
   });
 
-  const setState = useCallback(
-    (newData: T) => {
-      queryClient.setQueryData(queryKey, newData);
-    },
-    [queryClient, queryKey],
-  );
+  const setState = (newData: T) => {
+    queryClient.setQueryData(queryKey, newData);
+  };
 
   return [data as T, setState];
 }
